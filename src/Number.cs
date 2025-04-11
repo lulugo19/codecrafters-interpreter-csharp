@@ -11,6 +11,6 @@ public class Number
 
     public override string ToString()
     {
-        return Value.ToString("0.", CultureInfo.InvariantCulture.NumberFormat);
+        return Value.ToString("0.0###########################", CultureInfo.InvariantCulture.NumberFormat);
     }
 }
