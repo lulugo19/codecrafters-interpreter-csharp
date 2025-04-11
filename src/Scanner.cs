@@ -56,6 +56,9 @@ public class Scanner
             case '\n':
                 _line++;
                 break;
+            default: 
+                Console.Error.WriteLine($"[line ${_line}] Error: Unexpected character: ${c}");
+                break;
         }
     }
 
