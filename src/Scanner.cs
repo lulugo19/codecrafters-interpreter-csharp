@@ -130,7 +130,10 @@ public class Scanner
                 {
                     _AddIdentifier();
                 }
-                _EmitScannerError($"Unexpected character: {c}");          
+                else
+                {
+                    _EmitScannerError($"Unexpected character: {c}");
+                }       
                 break;
         }
     }
