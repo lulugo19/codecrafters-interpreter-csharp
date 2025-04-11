@@ -12,6 +12,26 @@ public class Scanner
     private int _current = 0;
     private int _line = 1;
 
+    private Dictionary<string, TokenType> _keywords = new() 
+    {
+        {"and", TokenType.AND},
+        {"class", TokenType.CLASS},
+        {"else", TokenType.ELSE},
+        {"false", TokenType.FALSE},
+        {"for", TokenType.FOR},
+        {"fun", TokenType.FUN},
+        {"if", TokenType.IF},
+        {"nil", TokenType.NIL},
+        {"or", TokenType.OR},
+        {"print", TokenType.PRINT},
+        {"return", TokenType.RETURN},
+        {"super", TokenType.SUPER},
+        {"this", TokenType.THIS},
+        {"true", TokenType.TRUE},
+        {"var", TokenType.VAR},
+        {"while", TokenType.WHILE}
+    };
+
     public Scanner(String source)
     {
         _source = source;
@@ -203,7 +223,15 @@ public class Scanner
         {
             _Advance();
         }
-        _AddToken(TokenType.IDENTIFIER);
+        var text = _GetTokenText();
+        if (_keywords.ContainsKey(text))
+        {
+            _AddToken(_keywords[text]);
+        }
+        else
+        {
+            _AddToken(TokenType.IDENTIFIER);
+        }
     }
 
     private char _Advance()
