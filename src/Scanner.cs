@@ -93,8 +93,8 @@ public class Scanner
         return _source[_current++];
     }
 
-    private char _Peek()
+    private char? _Peek()
     {
-        return _source[_current];
+        return _IsAtEnd() ? null : _source[_current];
     }
 }
