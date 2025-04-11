@@ -171,7 +171,7 @@ public class Scanner
             {
                 _Advance();
             }
-            else
+            else if (!char.IsDigit(_Peek() ?? ' '))
             {
                 break;
             }
