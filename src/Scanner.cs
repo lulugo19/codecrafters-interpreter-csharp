@@ -127,7 +127,7 @@ public class Scanner
     private void _EmitScannerError(string msg)
     {
         HasErrors = true;
-        Console.Error.WriteLine($"[line {_line}] Error: ${msg}");    
+        Console.Error.WriteLine($"[line {_line}] Error: {msg}");    
     }
 
     private void _AddToken(TokenType type)
@@ -143,12 +143,12 @@ public class Scanner
 
     private void _AddString()
     {
-        while (!_IsAtEnd() && _Advance() != '\"');
-        if (_IsAtEnd())
+        while (!_IsAtEnd() && _Advance() != '\"');     
+        string text = _source.Substring(_start, _current - _start);
+        if (text[^1] != '\"')
         {
             _EmitScannerError($"Unterminated string.");
         }
-        string text = _source.Substring(_start, _current - _start);
         _tokens.Add(new Token(TokenType.STRING, text, text[1..^1], _line));
     }
 
