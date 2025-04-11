@@ -98,7 +98,7 @@ public class Scanner
                 if (_Peek() == '/')
                 {   
                     // Comments with a forward slash
-                    while (_Advance() != '\n');
+                    while (!_IsAtEnd() && _Advance() != '\n');
                 }
                 else
                 {
