@@ -180,6 +180,7 @@ public class Scanner
 
     private void _AddNumberLiteral()
     {
+        Console.WriteLine(_Peek());
         while (!_IsAtEnd() && char.IsDigit(_Advance()))
         {
             Console.WriteLine(_Peek());
