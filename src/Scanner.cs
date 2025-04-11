@@ -65,7 +65,7 @@ public class Scanner
 
     private void _AddToken(TokenType type, object literal)
     {
-        string text = _source.Substring(_start, _current);
+        string text = _source.Substring(_start, _current-_start+1);
         _tokens.Add(new Token(type, text, literal, _line));
     }
 
