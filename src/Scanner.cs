@@ -122,6 +122,14 @@ public class Scanner
                 _AddNumberLiteral();
                 break;
             default:
+                if (char.IsDigit(c))
+                {
+                    _AddNumberLiteral();
+                }
+                if (_IsAlpha(c))
+                {
+                    _AddIdentifier();
+                }
                 _EmitScannerError($"Unexpected character: {c}");          
                 break;
         }
@@ -148,6 +156,10 @@ public class Scanner
         string text = _GetTokenText();
         _tokens.Add(new Token(type, text, literal, _line));
     }
+
+    private bool _IsAlpha(char c) => char.IsLetter(c) || c == '_';
+
+    private bool _IsAlphaNumeric(char c) => _IsAlpha(c) || char.IsDigit(c);
 
     private void _AddStringLiteral()
     {
@@ -179,6 +191,15 @@ public class Scanner
         string text = _GetTokenText();
         Number number = new Number(Decimal.Parse(text));
         _tokens.Add(new Token(TokenType.NUMBER, text, number, _line));
+    }
+
+    private void _AddIdentifier()
+    {
+        while (_IsAlphaNumeric(_Peek() ?? ' '))
+        {
+            _Advance();
+        }
+        _AddToken(TokenType.IDENTIFIER);
     }
 
     private char _Advance()
