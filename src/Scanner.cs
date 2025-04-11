@@ -99,6 +99,7 @@ public class Scanner
                 {   
                     // Comments with a forward slash
                     while (!_IsAtEnd() && _Advance() != '\n');
+                    _line++;
                 }
                 else
                 {
