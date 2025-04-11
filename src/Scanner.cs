@@ -171,6 +171,10 @@ public class Scanner
             {
                 _Advance();
             }
+            else
+            {
+                break;
+            }
         }
         string text = _GetTokenText();
         Number number = new Number(Decimal.Parse(text));
@@ -179,7 +183,7 @@ public class Scanner
 
     private char _Advance()
     {        
-        return _source[_current++];
+        return  _source[_current++];
     }
 
     private char? _Peek()
