@@ -180,17 +180,15 @@ public class Scanner
 
     private void _AddNumberLiteral()
     {
-        Console.WriteLine(_Peek());
-        while (!_IsAtEnd() && char.IsDigit(_Advance()))
+        while (!_IsAtEnd() && char.IsDigit(_Peek() ?? ' '))
         {
-            Console.WriteLine(_Peek());
+            _Advance();
             if (_Peek() == '.' && char.IsDigit(_PeekNext() ?? ' '))
             {
                 _Advance();
             }
             else if (!char.IsDigit(_Peek() ?? ' '))
             {
-                Console.WriteLine("break");
                 break;
             }
         }
