@@ -149,7 +149,10 @@ public class Scanner
         {
             _EmitScannerError($"Unterminated string.");
         }
-        _tokens.Add(new Token(TokenType.STRING, text, text[1..^1], _line));
+        else 
+        {
+            _tokens.Add(new Token(TokenType.STRING, text, text[1..^1], _line));
+        }
     }
 
     private char _Advance()
