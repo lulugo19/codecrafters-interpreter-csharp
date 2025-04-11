@@ -107,7 +107,7 @@ public class Scanner
                 }
                 break;
             case '\"':
-                _AddString();
+                _AddStringLiteral();
                 break;
             case ' ':
             case '\r':
@@ -117,6 +117,9 @@ public class Scanner
 
             case '\n':
                 _line++;
+                break;
+            case '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9':
+                _AddNumberLiteral();
                 break;
             default:
                 _EmitScannerError($"Unexpected character: {c}");          
@@ -135,16 +138,21 @@ public class Scanner
         _AddToken(type, null);
     }
 
+    private string _GetTokenText()
+    {
+        return _source.Substring(_start, _current - _start);
+    }
+
     private void _AddToken(TokenType type, object literal)
     {
-        string text = _source.Substring(_start, _current - _start);
+        string text = _GetTokenText();
         _tokens.Add(new Token(type, text, literal, _line));
     }
 
-    private void _AddString()
+    private void _AddStringLiteral()
     {
         while (!_IsAtEnd() && _Advance() != '\"');     
-        string text = _source.Substring(_start, _current - _start);
+        string text = _GetTokenText();
         if (text[^1] != '\"')
         {
             _EmitScannerError($"Unterminated string.");
@@ -155,6 +163,20 @@ public class Scanner
         }
     }
 
+    private void _AddNumberLiteral()
+    {
+        while (!_IsAtEnd() && char.IsDigit(_Advance()))
+        {
+            if (_Peek() == '.' && !char.IsDigit(_PeekNext() ?? ' '))
+            {
+                break;
+            }
+        }
+        string text = _GetTokenText();
+        decimal number = Decimal.Parse(text);
+        _tokens.Add(new Token(TokenType.NUMBER, text, number, _line));
+    }
+
     private char _Advance()
     {        
         return _source[_current++];
@@ -163,5 +185,10 @@ public class Scanner
     private char? _Peek()
     {
         return _IsAtEnd() ? null : _source[_current];
+    }
+
+    private char? _PeekNext()
+    {
+        return _current + 1 >= _source.Length  ? null : _source[_current + 1];
     }
 }
