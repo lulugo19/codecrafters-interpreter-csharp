@@ -24,7 +24,11 @@ Console.Error.WriteLine("Logs from your program will appear here!");
 // Uncomment this block to pass the first stage
 if (!string.IsNullOrEmpty(fileContents))
 {
-    throw new NotImplementedException("Scanner not implemented");
+    var scanner = new Scanner(fileContents);
+    foreach (var token in scanner.ScanTokens())
+    {
+        Console.WriteLine(token);
+    }
 }
 else
 {
