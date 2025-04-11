@@ -94,6 +94,17 @@ public class Scanner
                     _AddToken(TokenType.LESS);
                 }
                 break;
+            case '/':
+                if (_Peek() == '/')
+                {   
+                    // Comments with a forward slash
+                    while (_Advance() != '\n');
+                }
+                else
+                {
+                    _AddToken(TokenType.SLASH);
+                }
+                break;
             case ' ':
             case '\r':
             case '\t':
