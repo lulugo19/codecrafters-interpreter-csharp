@@ -50,6 +50,16 @@ public class Scanner
             case '+': _AddToken(TokenType.PLUS); break;
             case ';': _AddToken(TokenType.SEMICOLON); break;
             case '*': _AddToken(TokenType.STAR); break;
+            case '=':
+                if (_Peek() == '=')
+                {
+                    _Advance();
+                    _AddToken(TokenType.EQUAL_EQUAL);
+                }
+                else
+                {
+                    _AddToken(TokenType.EQUAL);
+                }
             case ' ':
             case '\r':
             case '\t':
@@ -80,5 +90,10 @@ public class Scanner
     private char _Advance()
     {        
         return _source[_current++];
+    }
+
+    private char _Peek()
+    {
+        return _source[_current];
     }
 }
