@@ -167,9 +167,9 @@ public class Scanner
     {
         while (!_IsAtEnd() && char.IsDigit(_Advance()))
         {
-            if (_Peek() == '.' && !char.IsDigit(_PeekNext() ?? ' '))
+            if (_Peek() == '.' && char.IsDigit(_PeekNext() ?? ' '))
             {
-                break;
+                _Advance();
             }
         }
         string text = _GetTokenText();
