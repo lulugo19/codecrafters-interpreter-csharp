@@ -61,6 +61,17 @@ public class Scanner
                     _AddToken(TokenType.EQUAL);
                 }
                 break;
+            case '!':
+                if (_Peek() == '=')
+                {
+                    _Advance();
+                    _AddToken(TokenType.BANG_EQUAL);
+                }
+                else
+                {
+                    _AddToken(TokenType.BANG);
+                }
+                break;
             case ' ':
             case '\r':
             case '\t':
