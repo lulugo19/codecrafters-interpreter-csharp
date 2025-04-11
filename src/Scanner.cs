@@ -72,6 +72,28 @@ public class Scanner
                     _AddToken(TokenType.BANG);
                 }
                 break;
+            case '>':
+                if (_Peek() == '=')
+                {
+                    _Advance();
+                    _AddToken(TokenType.GREATER_EQUAL);
+                }
+                else
+                {
+                    _AddToken(TokenType.GREATER);
+                }
+                break;
+            case '<':
+                if (_Peek() == '=')
+                {
+                    _Advance();
+                    _AddToken(TokenType.LESS_EQUAL);
+                }
+                else
+                {
+                    _AddToken(TokenType.LESS);
+                }
+                break;
             case ' ':
             case '\r':
             case '\t':
