@@ -60,6 +60,7 @@ public class Scanner
                 {
                     _AddToken(TokenType.EQUAL);
                 }
+                break;
             case ' ':
             case '\r':
             case '\t':
