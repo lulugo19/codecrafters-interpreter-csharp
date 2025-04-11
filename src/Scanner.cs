@@ -182,6 +182,7 @@ public class Scanner
     {
         while (!_IsAtEnd() && char.IsDigit(_Advance()))
         {
+            Console.WriteLine(_Peek());
             if (_Peek() == '.' && char.IsDigit(_PeekNext() ?? ' '))
             {
                 _Advance();
