@@ -3,6 +3,8 @@ using System.Transactions;
 
 public class Scanner
 {
+    public bool HasErrors {get; private set;}
+
     private readonly string _source;
     private readonly List<Token> _tokens = new List<Token>();
 
@@ -17,6 +19,7 @@ public class Scanner
 
     public List<Token> ScanTokens()
     {
+        HasErrors = false;
         _tokens.Clear();
         while(!_IsAtEnd())
         {
@@ -56,8 +59,9 @@ public class Scanner
             case '\n':
                 _line++;
                 break;
-            default: 
-                Console.Error.WriteLine($"[line ${_line}] Error: Unexpected character: ${c}");
+            default:
+                HasErrors = true;
+                Console.Error.WriteLine($"[line {_line}] Error: Unexpected character: {c}");            
                 break;
         }
     }

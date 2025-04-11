@@ -22,15 +22,14 @@ string fileContents = File.ReadAllText(filename);
 Console.Error.WriteLine("Logs from your program will appear here!");
 
 // Uncomment this block to pass the first stage
-if (!string.IsNullOrEmpty(fileContents))
+var scanner = new Scanner(fileContents);
+foreach (var token in scanner.ScanTokens())
 {
-    var scanner = new Scanner(fileContents);
-    foreach (var token in scanner.ScanTokens())
-    {
-        Console.WriteLine(token);
-    }
+    Console.WriteLine(token);
 }
-else
+if (scanner.HasErrors)
 {
-    Console.WriteLine("EOF  null"); // Placeholder, remove this line when implementing the scanner
+    return 65;
 }
+
+return 0;
