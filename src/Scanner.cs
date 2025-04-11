@@ -188,6 +188,7 @@ public class Scanner
             }
             else if (!char.IsDigit(_Peek() ?? ' '))
             {
+                Console.WriteLine("break");
                 break;
             }
         }
