@@ -106,6 +106,9 @@ public class Scanner
                     _AddToken(TokenType.SLASH);
                 }
                 break;
+            case '\"':
+                _AddString();
+                break;
             case ' ':
             case '\r':
             case '\t':
@@ -116,10 +119,15 @@ public class Scanner
                 _line++;
                 break;
             default:
-                HasErrors = true;
-                Console.Error.WriteLine($"[line {_line}] Error: Unexpected character: {c}");            
+                _EmitScannerError($"Unexpected character: {c}");          
                 break;
         }
+    }
+
+    private void _EmitScannerError(string msg)
+    {
+        HasErrors = true;
+        Console.Error.WriteLine($"[line {_line}] Error: ${msg}");    
     }
 
     private void _AddToken(TokenType type)
@@ -131,6 +139,17 @@ public class Scanner
     {
         string text = _source.Substring(_start, _current - _start);
         _tokens.Add(new Token(type, text, literal, _line));
+    }
+
+    private void _AddString()
+    {
+        while (!_IsAtEnd() && _Advance() != '\"');
+        if (_IsAtEnd())
+        {
+            _EmitScannerError($"Unterminated string.");
+        }
+        string text = _source.Substring(_start, _current - _start);
+        _tokens.Add(new Token(TokenType.STRING, text, text[1..^1], _line));
     }
 
     private char _Advance()
