@@ -15,6 +15,6 @@ public class Token
 
     public override String ToString()
     {
-        return Type + " " + Lexeme + " " + Literal;
+        return Type + " " + Lexeme + " " + Literal.ToString();
     }
 }
