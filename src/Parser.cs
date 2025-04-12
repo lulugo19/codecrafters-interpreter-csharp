@@ -33,6 +33,14 @@ public class Parser
             _Advance();
             return new Expr.Group(primary);
         }
+        if (_Match(TokenType.MINUS))
+        {
+            return new Expr.Unary.Negation(_Primary());
+        }
+        if (_Match(TokenType.BANG))
+        {
+            return new Expr.Unary.Not(_Primary());
+        }
 
         throw new Exception("Unknown token");
     }
