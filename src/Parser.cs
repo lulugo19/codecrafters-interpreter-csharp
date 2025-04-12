@@ -62,18 +62,18 @@ public class Parser
 
     private Stmt _Stmt()
     {
-        return _StmtPrint();
+        if (_Match(TokenType.PRINT))
+        {
+            return _StmtPrint();
+        }
+        return new Stmt.Expr(_Expr());
     }
 
     private Stmt.Print _StmtPrint()
-    {
-        if (_Match(TokenType.PRINT))
-        {
-            var stmt = new Stmt.Print(_Expr());
-            _Expect(TokenType.SEMICOLON);
-            return stmt;
-        }
-        throw _StmtError();
+    {     
+        var stmt = new Stmt.Print(_Expr());
+        _Expect(TokenType.SEMICOLON);
+        return stmt;     
     }
 
     private ParserException _StmtError()

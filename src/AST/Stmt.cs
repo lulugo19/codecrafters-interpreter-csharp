@@ -6,9 +6,9 @@ public abstract class Stmt
 
     public class Print : Stmt
     {
-        public Expr Expr {get; init;}
+        public AST.Expr Expr {get; init;}
 
-        public Print(Expr expr)
+        public Print(AST.Expr expr)
         {
             Expr = expr;
         }
@@ -16,6 +16,21 @@ public abstract class Stmt
         public override void Run(Interpreter.Context ctx)
         {
             Console.WriteLine(Expr.Eval().ToOutput());
+        }
+    }
+
+    public class Expr : Stmt
+    {
+        public AST.Expr E {get; init;}
+
+        public Expr(AST.Expr expr)
+        {
+            E = expr;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            E.Eval();
         }
     }
 
