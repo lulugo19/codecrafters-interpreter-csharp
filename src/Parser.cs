@@ -90,7 +90,11 @@ public class Parser
     {
         var id = _Expect(TokenType.IDENTIFIER);
         _Expect(TokenType.EQUAL);
-        var val = _Expr();
+        Expr? val = null;
+        if (!_Check(TokenType.SEMICOLON))
+        {
+            val = _Expr();
+        }
         return new Stmt.VarDecl(id, val);  
     }
 

@@ -37,9 +37,9 @@ public abstract class Stmt
     public class VarDecl : Stmt
     {
         public Token Id {get; init; }
-        public AST.Expr Value {get; init;}
+        public AST.Expr? Value {get; init;}
 
-        public VarDecl(Token id, AST.Expr val)
+        public VarDecl(Token id, AST.Expr? val)
         {
             Id = id;
             Value = val;
@@ -47,7 +47,11 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            ctx.Vars.Add(Id.Lexeme, Value.Eval(ctx));
+            if (!ctx.Vars.ContainsKey(Id.Lexeme))
+            {
+                throw new Exception($"Undefined variable '{Id.Lexeme}'");
+            }
+            ctx.Vars.Add(Id.Lexeme, Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance));
         }
     }
 
