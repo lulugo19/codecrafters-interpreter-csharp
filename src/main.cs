@@ -26,6 +26,8 @@ switch (command)
         return Parse();
     case "evaluate":
         return Evaluate();
+    case "run":
+        return Run();
     default:
         Console.Error.WriteLine($"Unknown command: {command}");
         return 1;
@@ -48,7 +50,7 @@ int Tokenize()
 int Parse()
 {
     var parser = new Parser(fileContents);
-    var expr = parser.ParseExpression();
+    var expr = parser.ParseExpr();
     if (parser.HasErrors)
     {
         return 65;
@@ -60,7 +62,7 @@ int Parse()
 int Evaluate()
 {
     var parser = new Parser(fileContents);
-    var expr = parser.ParseExpression();
+    var expr = parser.ParseExpr();
     if (parser.HasErrors)
     {
         return 65;
@@ -68,6 +70,27 @@ int Evaluate()
     try 
     {
         Console.WriteLine(expr!.Eval().ToOutput()); 
+        return 0;
+    }
+    catch (Exception e)
+    {
+        Console.Error.WriteLine(e.Message);
+        return 70;
+    }
+}
+
+int Run()
+{
+    var parser = new Parser(fileContents);
+    var program = parser.ParseProgram();
+    if (parser.HasErrors)
+    {
+        return 65;
+    }
+    try 
+    {
+        Interpreter intrp = new Interpreter();
+        intrp.Run(program);
         return 0;
     }
     catch (Exception e)
