@@ -45,7 +45,7 @@ public abstract class Expr
 
             public override string ToString()
             {
-                return $"(! {Expr})";
+                return $"(- {Expr})";
             }
         }
 
@@ -60,7 +60,7 @@ public abstract class Expr
 
             public override string ToString()
             {
-                return $"(- {Expr})";
+                return $"(! {Expr})";
             }
         }
     }
