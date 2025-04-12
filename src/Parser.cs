@@ -17,7 +17,122 @@ public class Parser
 
     public Expr Parse()
     {
-        return _Primary();
+        return _Expression();
+    }
+
+    public Expr _Expression()
+    {
+        return _Equality();
+    }
+
+    public Expr _Equality()
+    {
+        var expr = _Comparison();
+
+        while (true)
+        {
+            if (_Match(TokenType.EQUAL_EQUAL))
+            {
+                expr = new Expr.Binary.Equal(expr, _Comparison());
+            }
+            else if (_Match(TokenType.BANG_EQUAL))
+            {
+                expr = new Expr.Binary.UnEqual(expr, _Comparison());
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
+    public Expr _Comparison()
+    {
+        var comp = _Term();
+        while (true)
+        {
+            if (_Match(TokenType.GREATER))
+            {
+                comp = new Expr.Binary.Greater(comp, _Term());
+            }
+            else if (_Match(TokenType.GREATER_EQUAL))
+            {
+                comp = new Expr.Binary.GreaterEq(comp, _Term());
+            }
+            else if (_Match(TokenType.LESS))
+            {
+                comp = new Expr.Binary.Less(comp, _Term());
+            }
+            else if (_Match(TokenType.LESS_EQUAL))
+            {
+                comp = new Expr.Binary.LessEq(comp, _Term());
+            }
+            else
+            {
+                break;
+            }
+        }
+        return comp;
+    }
+
+    public Expr _Term()
+    {
+        var term = _Factor();
+        while (true)
+        {
+            if (_Match(TokenType.PLUS))
+            {
+                term = new Expr.Binary.Add(term, _Factor());
+            }
+            else if (_Match(TokenType.MINUS))
+            {
+                term = new Expr.Binary.Sub(term, _Factor());
+            }
+            else
+            {
+                break;
+            }
+        }
+        return term;
+    }
+
+    public Expr _Factor()
+    {
+        var factor = _Unary();
+        while (true)
+        {
+            if (_Match(TokenType.STAR))
+            {
+                factor = new Expr.Binary.Mul(factor, _Unary());
+            }
+            else if (_Match(TokenType.SLASH))
+            {
+                factor = new Expr.Binary.Div(factor, _Unary());
+            }
+            else
+            {
+                break;
+            }
+        }
+        return factor;
+    }
+
+    public Expr _Unary()
+    {
+        if (_Match(TokenType.MINUS))
+        {
+            return new Expr.Unary.Negation(_Unary());
+        }
+        if (_Match(TokenType.BANG))
+        {
+            return new Expr.Unary.Not(_Unary());
+        }
+        else
+        {
+            return _Primary();
+        }      
     }
 
     public Expr _Primary()
@@ -29,21 +144,13 @@ public class Parser
         if (_Match(TokenType.STRING)) return new Expr.Literal(new Literal.String(_Previous().Literal as string));
         if (_Match(TokenType.LEFT_PAREN)) 
         {
-            var primary = _Primary();
+            var expr = _Expression();
             _Advance();
-            return new Expr.Group(primary);
+            return new Expr.Group(expr);
         }
-        if (_Match(TokenType.MINUS))
-        {
-            return new Expr.Unary.Negation(_Primary());
-        }
-        if (_Match(TokenType.BANG))
-        {
-            return new Expr.Unary.Not(_Primary());
-        }
-
         throw new Exception("Unknown token");
     }
+
 
     private bool _IsAtEnd()
     {
