@@ -149,7 +149,7 @@ public abstract class Expr
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
-                    return new Literal(new AST.Literal.Boolean(lit1.Value.GetValue() != lit2.Value.GetValue()));
+                    return new Literal(new AST.Literal.Boolean(lit1.Value.GetValue().ToString() != lit2.Value.GetValue().ToString()));
                 }
 
                 return new Literal(new AST.Literal.Boolean(false));

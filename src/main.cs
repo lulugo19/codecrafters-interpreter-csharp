@@ -65,6 +65,14 @@ int Evaluate()
     {
         return 65;
     }
-    Console.WriteLine(expr!.Eval().ToOutput()); 
-    return 0;
+    try 
+    {
+        Console.WriteLine(expr!.Eval().ToOutput()); 
+        return 0;
+    }
+    catch (Exception e)
+    {
+        Console.Error.WriteLine(e);
+        return 70;
+    }
 }
