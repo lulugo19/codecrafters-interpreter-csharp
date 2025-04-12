@@ -11,12 +11,7 @@ if (args.Length < 2)
 string command = args[0];
 string filename = args[1];
 
-
 string fileContents = File.ReadAllText(filename);
-
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-Console.Error.WriteLine("Logs from your program will appear here!");
-
 
 switch (command)
 {
