@@ -31,7 +31,7 @@ public class Interpreter
         public Expr GetVarVal(Token identifier)
         {
             string id = identifier.Lexeme;
-            foreach (var scope in Scopes.Reverse())
+            foreach (var scope in Scopes)
             {
                 scope.Vars.TryGetValue(id, out Expr? val);
                 if (val != null)
