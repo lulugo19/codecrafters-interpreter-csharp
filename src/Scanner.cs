@@ -212,7 +212,7 @@ public class Scanner
             }
         }
         string text = _GetTokenText();
-        Literal.Number number = new Literal.Number(Decimal.Parse(text));
+        Number number = new Number(Decimal.Parse(text));
         _tokens.Add(new Token(TokenType.NUMBER, text, number, _line));
     }
 
