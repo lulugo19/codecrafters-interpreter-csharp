@@ -66,7 +66,7 @@ public class Parser
         {
             return _StmtPrint();
         }
-        return new Stmt.Expr(_Expr());
+        return _StmtExpr();
     }
 
     private Stmt.Print _StmtPrint()
@@ -74,6 +74,13 @@ public class Parser
         var stmt = new Stmt.Print(_Expr());
         _Expect(TokenType.SEMICOLON);
         return stmt;     
+    }
+
+    private Stmt.Expr _StmtExpr()
+    {
+        var expr = _Expr();
+        _Expect(TokenType.SEMICOLON);
+        return new Stmt.Expr(expr);
     }
 
     private ParserException _StmtError()
