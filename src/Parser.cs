@@ -24,6 +24,7 @@ public class Parser
 
     public Expr? ParseExpression()
     {
+        _current = 0;
         HasErrors = false;
         try
         {
