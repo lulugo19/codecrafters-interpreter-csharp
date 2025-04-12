@@ -31,7 +31,7 @@ public class Parser
         {
             var primary = _Primary();
             _Advance();
-            return primary;
+            return new Expr.Group(primary);
         }
 
         throw new Exception("Unknown token");

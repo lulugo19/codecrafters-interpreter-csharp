@@ -16,4 +16,19 @@ public abstract class Expr
             return Value.ToString();
         }
     }
+
+    public class Group : Expr
+    {
+        public Expr InnerExpr {get; init;}
+
+        public Group(Expr innerExpr)
+        {
+            InnerExpr = innerExpr;
+        }
+
+        public override string ToString()
+        {
+            return $"(group {InnerExpr})";
+        }
+    }
 }
