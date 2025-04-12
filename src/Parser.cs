@@ -56,7 +56,9 @@ public class Parser
             return _Expr();
         }
         catch (ParserException e)
-        {
+        {   
+            HasErrors = true;
+            Console.Error.Write(e.Message);
             return null;
         }       
     }
