@@ -47,7 +47,7 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            ctx.Vars.Add(Id.Lexeme, Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance));
+            ctx.Vars[Id.Lexeme] = Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance);
         }
     }
 
