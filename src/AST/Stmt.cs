@@ -47,7 +47,7 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            ctx.Vars[Id.Lexeme] = Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance);
+            ctx.DeclareVar(Id,  Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance));
         }
     }
 
@@ -63,6 +63,26 @@ public abstract class Stmt
         public override void Run(Interpreter.Context ctx)
         {
             Asgn.Eval(ctx);
+        }
+    }
+
+    public class Block : Stmt
+    {
+        public List<Stmt> Stmts {get; init;}
+
+        public Block(List<Stmt> stmts)
+        {
+            Stmts = stmts;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            ctx.StartBlockScope();
+            foreach (var stmt in Stmts)
+            {
+                stmt.Run(ctx);
+            }
+            ctx.EndBlockScope();
         }
     }
 

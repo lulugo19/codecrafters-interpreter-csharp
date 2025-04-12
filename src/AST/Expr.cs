@@ -48,13 +48,8 @@ public abstract class Expr
         }
 
         public override Expr Eval(Interpreter.Context ctx)
-        {
-            ctx.Vars.TryGetValue(Id.Lexeme, out Expr? val);
-            if (val == null)
-            {
-                throw new Exception($"Undefined variable '{Id.Lexeme}'");
-            }
-            return val;
+        {         
+            return ctx.GetVarVal(Id);
         }
     }
 
@@ -71,9 +66,7 @@ public abstract class Expr
 
         public override Expr Eval(Interpreter.Context ctx)
         {
-            var val = Val.Eval(ctx);
-            ctx.Vars[Id.Lexeme] = val;
-            return val;
+            return ctx.AssignVar(Id, Val);
         }
     }
 

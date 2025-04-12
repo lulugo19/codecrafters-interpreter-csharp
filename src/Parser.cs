@@ -28,17 +28,8 @@ public class Parser
         HasErrors = false;
         var stmts = new List<Stmt>();
         try 
-        {
-            while (!_IsAtEnd())
-            {
-                stmts.Add(_Stmt());
-                _Expect(TokenType.SEMICOLON);
-                if (_Peek().Type == TokenType.EOF)
-                {
-                    break;
-                }
-            }
-            return stmts;
+        {          
+            stmts = _Stmts();
         }     
         catch (ParserException e)
         {
@@ -64,6 +55,21 @@ public class Parser
         }       
     }
 
+    private List<Stmt> _Stmts()
+    {
+        var stmts = new List<Stmt>();
+        while (!_IsAtEnd())
+        {
+            stmts.Add(_Stmt());
+            _Expect(TokenType.SEMICOLON);
+            if (_Peek().Type == TokenType.EOF || _Peek().Type == TokenType.RIGHT_BRACE)
+            {
+                break;
+            }
+        }
+        return stmts;
+    } 
+
     private Stmt _Stmt()
     {
         if (_Match(TokenType.PRINT))
@@ -73,6 +79,10 @@ public class Parser
         else if (_Match(TokenType.VAR))
         {
             return _StmtVarDecl();
+        }
+        else if (_Match(TokenType.LEFT_BRACE))
+        {
+            return _StmtBlock();
         }
         return _StmtExpr();
     }
@@ -98,6 +108,13 @@ public class Parser
         {
             return new Stmt.VarDecl(id, null);
         }               
+    }
+
+    private Stmt.Block _StmtBlock()
+    {
+        var stmts = _Stmts();
+        _Expect(TokenType.RIGHT_PAREN);
+        return new Stmt.Block(stmts);
     }
 
     private ParserException _StmtError()
