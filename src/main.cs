@@ -64,7 +64,7 @@ int Evaluate()
     }
     try 
     {
-        Console.WriteLine(expr!.Eval().ToOutput()); 
+        Console.WriteLine(expr!.Eval(new Interpreter.Context()).ToOutput()); 
         return 0;
     }
     catch (Exception e)

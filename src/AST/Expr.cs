@@ -1,11 +1,12 @@
 
+using System.Data.Common;
 using System.Formats.Asn1;
 using System.Net.Http.Headers;
 
 namespace AST;
 public abstract class Expr
 {
-    public abstract Expr Eval();
+    public abstract Expr Eval(Interpreter.Context ctx);
 
     public virtual string? ToOutput()
     {
@@ -31,9 +32,24 @@ public abstract class Expr
             return Value.ToOutput();
         }
 
-        public override Expr Eval()
+        public override Expr Eval(Interpreter.Context ctx)
         {
             return this;
+        }
+    }
+
+    public class Var : Expr
+    {
+        public Token Id {get; init;}
+
+        public Var(Token id)
+        {
+            Id = id;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            return ctx.Vars[Id.Lexeme];
         }
     }
 
@@ -51,9 +67,9 @@ public abstract class Expr
             return $"(group {InnerExpr})";
         }
 
-        public override Expr Eval()
+        public override Expr Eval(Interpreter.Context ctx)
         {
-            return InnerExpr.Eval();
+            return InnerExpr.Eval(ctx);
         }
     }
 
@@ -75,9 +91,9 @@ public abstract class Expr
                 return $"(- {Expr})";
             }
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                if (Expr.Eval() is Literal lit && lit.Value is AST.Literal.Number num)
+                if (Expr.Eval(ctx) is Literal lit && lit.Value is AST.Literal.Number num)
                 {
                     return new Expr.Literal(new AST.Literal.Number(-num.Value));
                 }
@@ -94,9 +110,9 @@ public abstract class Expr
                 return $"(! {Expr})";
             }
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var val = Expr.Eval();
+                var val = Expr.Eval(ctx);
                 // false and nil is falsy and everything else is truthy
                 var falsy = val is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
                 return new Literal(new AST.Literal.Boolean(falsy));
@@ -119,10 +135,10 @@ public abstract class Expr
         {
             public Equal(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -142,10 +158,10 @@ public abstract class Expr
         {
             public UnEqual(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -165,10 +181,10 @@ public abstract class Expr
         {
             public Less(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -191,10 +207,10 @@ public abstract class Expr
         {
             public Greater(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -217,10 +233,10 @@ public abstract class Expr
         {
             public LessEq(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -243,10 +259,10 @@ public abstract class Expr
         {
             public GreaterEq(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -269,10 +285,10 @@ public abstract class Expr
         {
             public Add(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -299,10 +315,10 @@ public abstract class Expr
         {
             public Sub(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -325,10 +341,10 @@ public abstract class Expr
         {
             public Mul(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {
@@ -351,10 +367,10 @@ public abstract class Expr
         {
             public Div(Expr left, Expr right) : base(left, right) {}
 
-            public override Expr Eval()
+            public override Expr Eval(Interpreter.Context ctx)
             {
-                var leftVal = Left.Eval();
-                var rightVal = Right.Eval();
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
 
                 if (leftVal is Literal lit1 && rightVal is Literal lit2 && lit1.Value.GetType() == lit2.Value.GetType())
                 {

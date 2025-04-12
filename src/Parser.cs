@@ -32,6 +32,7 @@ public class Parser
             while (!_IsAtEnd())
             {
                 stmts.Add(_Stmt());
+                _Expect(TokenType.SEMICOLON);
                 if (_Peek().Type == TokenType.EOF)
                 {
                     break;
@@ -66,21 +67,29 @@ public class Parser
         {
             return _StmtPrint();
         }
+        else if (_Match(TokenType.VAR))
+        {
+            return _StmtVarDecl();
+        }
         return _StmtExpr();
     }
 
     private Stmt.Print _StmtPrint()
     {     
-        var stmt = new Stmt.Print(_Expr());
-        _Expect(TokenType.SEMICOLON);
-        return stmt;     
+        return new Stmt.Print(_Expr());  
     }
 
     private Stmt.Expr _StmtExpr()
+    { 
+        return new Stmt.Expr(_Expr());
+    }
+
+    private Stmt.VarDecl _StmtVarDecl()
     {
-        var expr = _Expr();
-        _Expect(TokenType.SEMICOLON);
-        return new Stmt.Expr(expr);
+        var id = _Expect(TokenType.IDENTIFIER);
+        _Expect(TokenType.EQUAL);
+        var val = _Expr();
+        return new Stmt.VarDecl(id, val);  
     }
 
     private ParserException _StmtError()
@@ -218,6 +227,7 @@ public class Parser
         if (_Match(TokenType.FALSE)) return new Expr.Literal(new Literal.Boolean(false));
         if (_Match(TokenType.NUMBER)) return new Expr.Literal(new Literal.Number(((Number)_Previous().Literal).Value));
         if (_Match(TokenType.STRING)) return new Expr.Literal(new Literal.String(_Previous().Literal as string));
+        if (_Match(TokenType.IDENTIFIER)) return new Expr.Var(_Previous());
         if (_Match(TokenType.LEFT_PAREN)) 
         {
             var expr = _Expr();

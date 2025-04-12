@@ -15,7 +15,7 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            Console.WriteLine(Expr.Eval().ToOutput());
+            Console.WriteLine(Expr.Eval(ctx).ToOutput());
         }
     }
 
@@ -30,7 +30,24 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            E.Eval();
+            E.Eval(ctx);
+        }
+    }
+
+    public class VarDecl : Stmt
+    {
+        public Token Id {get; init; }
+        public AST.Expr Value {get; init;}
+
+        public VarDecl(Token id, AST.Expr val)
+        {
+            Id = id;
+            Value = val;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            ctx.Vars.Add(Id.Lexeme, Value.Eval(ctx));
         }
     }
 
