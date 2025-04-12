@@ -24,6 +24,8 @@ switch (command)
         return Tokenize();
     case "parse":
         return Parse();
+    case "evaluate":
+        return Evaluate();
     default:
         Console.Error.WriteLine($"Unknown command: {command}");
         return 1;
@@ -52,5 +54,17 @@ int Parse()
         return 65;
     }
     Console.WriteLine(expr); 
+    return 0;
+}
+
+int Evaluate()
+{
+    var parser = new Parser(fileContents);
+    var expr = parser.ParseExpression();
+    if (parser.HasErrors)
+    {
+        return 65;
+    }
+    Console.WriteLine(expr!.Eval()); 
     return 0;
 }

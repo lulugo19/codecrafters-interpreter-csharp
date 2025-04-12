@@ -4,6 +4,8 @@ namespace AST;
 
 public abstract class Literal
 {
+    public abstract object GetValue();
+
     public class Boolean : Literal
     {
         public bool Value {get; init;}
@@ -17,6 +19,11 @@ public abstract class Literal
         {
             return Value.ToString().ToLower();
         }
+
+        public override object GetValue()
+        {
+            return Value;
+        }
     }
 
     public class Nil : Literal
@@ -24,6 +31,11 @@ public abstract class Literal
         public override string ToString()
         {
             return "nil";
+        }
+
+        public override object GetValue()
+        {
+            return Nil.Instance;
         }
 
         private static Nil _instance = new Nil();
@@ -44,6 +56,11 @@ public abstract class Literal
         {
             return Value.ToString("0.0###########################", CultureInfo.InvariantCulture.NumberFormat);
         }
+
+        public override object GetValue()
+        {
+            return Value;
+        }
     }
 
     public class String : Literal
@@ -58,6 +75,11 @@ public abstract class Literal
         public override string ToString()
         {
             return $"{Value}";
+        }
+
+        public override object GetValue()
+        {
+            return Value;
         }
     }
 }
