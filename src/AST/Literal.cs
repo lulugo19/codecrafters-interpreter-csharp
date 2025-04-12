@@ -57,7 +57,7 @@ public abstract class Literal
 
         public override string ToString()
         {
-            return $"\"{Value}\"";
+            return $"{Value}";
         }
     }
 }
