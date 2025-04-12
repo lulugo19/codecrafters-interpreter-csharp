@@ -24,14 +24,24 @@ public class Parser
 
     public List<Stmt> ParseProgram()
     {
+        _current = 0;
+        HasErrors = false;
         var stmts = new List<Stmt>();
-        while (!_IsAtEnd())
+        try 
         {
-            stmts.Add(_Stmt());
-            if (_Peek().Type == TokenType.EOF)
+            while (!_IsAtEnd())
             {
-                break;
+                stmts.Add(_Stmt());
+                if (_Peek().Type == TokenType.EOF)
+                {
+                    break;
+                }
             }
+            return stmts;
+        }     
+        catch (ParserException e)
+        {
+            
         }
         return stmts;
     }
@@ -59,7 +69,7 @@ public class Parser
     {
         if (_Match(TokenType.PRINT))
         {
-            var stmt = new Stmt.Print(ParseExpr()!);
+            var stmt = new Stmt.Print(_Expr());
             _Expect(TokenType.SEMICOLON);
             return stmt;
         }
