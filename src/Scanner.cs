@@ -173,7 +173,7 @@ public class Scanner
         return _source.Substring(_start, _current - _start);
     }
 
-    private void _AddToken(TokenType type, Literal? literal)
+    private void _AddToken(TokenType type, object? literal)
     {
         string text = _GetTokenText();
         _tokens.Add(new Token(type, text, literal, _line));
@@ -193,7 +193,7 @@ public class Scanner
         }
         else 
         {
-            _tokens.Add(new Token(TokenType.STRING, text, new Literal.String(text[1..^1]), _line));
+            _tokens.Add(new Token(TokenType.STRING, text, text[1..^1], _line));
         }
     }
 
