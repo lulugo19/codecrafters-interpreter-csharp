@@ -46,6 +46,11 @@ int Tokenize()
 int Parse()
 {
     var parser = new Parser(fileContents);
-    Console.WriteLine(parser.Parse());
+    var expr = parser.ParseExpression();
+    if (parser.HasErrors)
+    {
+        return 65;
+    }
+    Console.WriteLine(parser.ParseExpression()); 
     return 0;
 }

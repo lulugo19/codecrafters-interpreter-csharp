@@ -4,9 +4,16 @@ using AST;
 
 public class Parser
 {
+    public class ParserException : Exception
+    {
+        public ParserException(string msg) : base(msg) {}
+    }
+
     private readonly string _source;
     private readonly List<Token> _tokens;
     private int _current;
+
+    public bool HasErrors {get; private set;} = false;
 
     public Parser(string source)
     {
@@ -15,9 +22,17 @@ public class Parser
         _tokens = new Scanner(source).ScanTokens();
     }
 
-    public Expr Parse()
+    public Expr? ParseExpression()
     {
-        return _Expression();
+        HasErrors = false;
+        try
+        {
+            return _Expression();
+        }
+        catch (ParserException e)
+        {
+            return null;
+        }       
     }
 
     public Expr _Expression()
@@ -148,7 +163,20 @@ public class Parser
             _Advance();
             return new Expr.Group(expr);
         }
-        throw new Exception("Unknown token");
+        throw _Error();    
+    }
+
+    private ParserException _Error()
+    {
+        HasErrors = true;
+        var msg = "No valid expression";
+        if (_current > 0) 
+        {          
+            var token = _Previous();
+            msg = $"[line {token.Line}] Error at '{token.Lexeme}': Expect expression.";
+        }      
+        Console.Error.WriteLine(msg);
+        return new ParserException(msg);
     }
 
 
