@@ -115,7 +115,22 @@ public class Parser
 
     private Expr _Expr()
     {
-        return _ExprEqu();
+        return _ExprVarAsgn();
+    }
+
+    private Expr _ExprVarAsgn()
+    {
+        if (_Peek().Type == TokenType.IDENTIFIER && _PeekNext().Type == TokenType.EQUAL)
+        {
+            var id = _Advance();
+            _Advance();
+            var val = _Expr();
+            return new Expr.VarAsgn(id, val);
+        }
+        else
+        {
+            return _ExprEqu();
+        }      
     }
 
     private Expr _ExprEqu()

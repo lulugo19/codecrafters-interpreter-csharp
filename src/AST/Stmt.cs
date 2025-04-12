@@ -51,4 +51,19 @@ public abstract class Stmt
         }
     }
 
+    public class VarAsgn : Stmt
+    {
+        public AST.Expr.VarAsgn Asgn {get; init;}
+
+        public VarAsgn(AST.Expr.VarAsgn asgn)
+        {
+            Asgn = asgn;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            Asgn.Eval(ctx);
+        }
+    }
+
 }

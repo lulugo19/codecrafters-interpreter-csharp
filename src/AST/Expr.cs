@@ -58,6 +58,25 @@ public abstract class Expr
         }
     }
 
+    public class VarAsgn : Expr
+    {
+        public Token Id {get; init;}
+        public Expr Val {get; init;}
+
+        public VarAsgn(Token id, Expr val)
+        {
+            Id = id;
+            Val = val;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            var val = Val.Eval(ctx);
+            ctx.Vars[Id.Lexeme] = val;
+            return val;
+        }
+    }
+
     public class Group : Expr
     {
         public Expr InnerExpr {get; init;}
