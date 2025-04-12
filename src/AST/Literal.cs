@@ -69,7 +69,7 @@ public abstract class Literal
 
         public override string? ToOutput()
         {
-            return Value.ToString(CultureInfo.InvariantCulture.NumberFormat);
+            return Value.ToString("G29", CultureInfo.InvariantCulture.NumberFormat);
         }
     }
 

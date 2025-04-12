@@ -1,3 +1,4 @@
+using System.Globalization;
 using AST;
 
 public class Scanner
@@ -212,7 +213,7 @@ public class Scanner
             }
         }
         string text = _GetTokenText();
-        Number number = new Number(Decimal.Parse(text));
+        Number number = new Number(Decimal.Parse(text, CultureInfo.InvariantCulture));
         _tokens.Add(new Token(TokenType.NUMBER, text, number, _line));
     }
 
