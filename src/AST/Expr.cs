@@ -6,6 +6,11 @@ public abstract class Expr
 {
     public abstract Expr Eval();
 
+    public virtual string? ToOutput()
+    {
+        return ToString();
+    }
+
     public class Literal : Expr
     {
         public AST.Literal Value {get; init;}
@@ -18,6 +23,11 @@ public abstract class Expr
         public override string? ToString()
         {
             return Value.ToString();
+        }
+
+        public override string? ToOutput()
+        {
+            return Value.ToOutput();
         }
 
         public override Expr Eval()

@@ -65,6 +65,6 @@ int Evaluate()
     {
         return 65;
     }
-    Console.WriteLine(expr!.Eval()); 
+    Console.WriteLine(expr!.Eval().ToOutput()); 
     return 0;
 }

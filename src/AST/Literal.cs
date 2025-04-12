@@ -6,6 +6,11 @@ public abstract class Literal
 {
     public abstract object GetValue();
 
+    public virtual string? ToOutput() 
+    {
+        return ToString();
+    }
+
     public class Boolean : Literal
     {
         public bool Value {get; init;}
@@ -54,12 +59,17 @@ public abstract class Literal
 
         public override string ToString()
         {
-            return Value.ToString(CultureInfo.InvariantCulture.NumberFormat);
+            return Value.ToString("0.0###########################", CultureInfo.InvariantCulture.NumberFormat);
         }
 
         public override object GetValue()
         {
             return Value;
+        }
+
+        public override string? ToOutput()
+        {
+            return Value.ToString("0.0###########################", CultureInfo.InvariantCulture.NumberFormat);
         }
     }
 
