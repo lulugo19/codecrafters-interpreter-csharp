@@ -60,8 +60,12 @@ public class Parser
         var stmts = new List<Stmt>();
         while (!_IsAtEnd())
         {
-            stmts.Add(_Stmt());
-            _Expect(TokenType.SEMICOLON);
+            var stmt = _Stmt();
+            stmts.Add(stmt);
+            if (stmt is not Stmt.Block)
+            {
+                _Expect(TokenType.SEMICOLON);
+            }          
             if (_Peek().Type == TokenType.EOF || _Peek().Type == TokenType.RIGHT_BRACE)
             {
                 break;
