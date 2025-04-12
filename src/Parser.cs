@@ -113,7 +113,7 @@ public class Parser
     private Stmt.Block _StmtBlock()
     {
         var stmts = _Stmts();
-        _Expect(TokenType.RIGHT_PAREN);
+        _Expect(TokenType.RIGHT_BRACE);
         return new Stmt.Block(stmts);
     }
 
@@ -306,7 +306,7 @@ public class Parser
         if (_Check(type)) return _Advance();
 
         var prev = _Previous();
-        throw new ParserException($"[line {prev.Line}] Expected token '{type}' but got '{_Peek().Type}'");
+        throw new ParserException($"[line {prev.Line}] Expected token '{type}' but got '{_Peek().Lexeme}'");
     }
 
     private Token _Peek()
