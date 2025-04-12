@@ -28,6 +28,10 @@ public class Parser
         while (!_IsAtEnd())
         {
             stmts.Add(_Stmt());
+            if (_Peek().Type == TokenType.EOF)
+            {
+                break;
+            }
         }
         return stmts;
     }
@@ -224,7 +228,7 @@ public class Parser
 
     private bool _IsAtEnd()
     {
-        return _current >= _tokens.Count || _Match(TokenType.EOF);
+        return _current >= _tokens.Count;
     }
 
     private Token _Advance()
