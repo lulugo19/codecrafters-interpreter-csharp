@@ -306,7 +306,7 @@ public class Parser
         if (_Check(type)) return _Advance();
 
         var prev = _Previous();
-        throw new ParserException($"[line {prev.Line}] Expected token '{type}' but got '{_Peek().Lexeme}'");
+        throw new ParserException($"[line {prev.Line}] Expected token '{type}' but got '{_Peek().Type}'");
     }
 
     private Token _Peek()
