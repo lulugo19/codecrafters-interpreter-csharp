@@ -42,7 +42,8 @@ public class Parser
         }     
         catch (ParserException e)
         {
-            
+            HasErrors = true;
+            Console.Error.Write(e.Message);
         }
         return stmts;
     }
@@ -89,13 +90,14 @@ public class Parser
     private Stmt.VarDecl _StmtVarDecl()
     {
         var id = _Expect(TokenType.IDENTIFIER);
-        _Expect(TokenType.EQUAL);
-        Expr? val = null;
-        if (!_Check(TokenType.SEMICOLON))
+        if (_Match(TokenType.EQUAL))
         {
-            val = _Expr();
+            return new Stmt.VarDecl(id, _Expr());
         }
-        return new Stmt.VarDecl(id, val);  
+        else
+        {
+            return new Stmt.VarDecl(id, null);
+        }               
     }
 
     private ParserException _StmtError()
