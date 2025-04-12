@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 
+
 if (args.Length < 2)
 {
     Console.Error.WriteLine("Usage: ./your_program.sh tokenize <filename>");
@@ -10,26 +11,41 @@ if (args.Length < 2)
 string command = args[0];
 string filename = args[1];
 
-if (command != "tokenize")
-{
-    Console.Error.WriteLine($"Unknown command: {command}");
-    Environment.Exit(1);
-}
 
 string fileContents = File.ReadAllText(filename);
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 Console.Error.WriteLine("Logs from your program will appear here!");
 
-// Uncomment this block to pass the first stage
-var scanner = new Scanner(fileContents);
-foreach (var token in scanner.ScanTokens())
+
+switch (command)
 {
-    Console.WriteLine(token);
+    case "tokenize":
+        return Tokenize();
+    case "parse":
+        return Parse();
+    default:
+        Console.Error.WriteLine($"Unknown command: {command}");
+        return 1;
 }
-if (scanner.HasErrors)
+// Uncomment this block to pass the first stage
+int Tokenize()
 {
-    return 65;
+    var scanner = new Scanner(fileContents);
+    foreach (var token in scanner.ScanTokens())
+    {
+        Console.WriteLine(token);
+    }
+    if (scanner.HasErrors)
+    {
+        return 65;
+    }
+    return 0;
 }
 
-return 0;
+int Parse()
+{
+    var parser = new Parser(fileContents);
+    Console.WriteLine(parser.Parse());
+    return 0;
+}

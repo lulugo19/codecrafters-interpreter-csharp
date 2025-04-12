@@ -1,5 +1,4 @@
-using System.Diagnostics;
-using System.Transactions;
+using AST;
 
 public class Scanner
 {
@@ -174,7 +173,7 @@ public class Scanner
         return _source.Substring(_start, _current - _start);
     }
 
-    private void _AddToken(TokenType type, object literal)
+    private void _AddToken(TokenType type, Literal? literal)
     {
         string text = _GetTokenText();
         _tokens.Add(new Token(type, text, literal, _line));
@@ -194,7 +193,7 @@ public class Scanner
         }
         else 
         {
-            _tokens.Add(new Token(TokenType.STRING, text, text[1..^1], _line));
+            _tokens.Add(new Token(TokenType.STRING, text, new Literal.String(text[1..^1]), _line));
         }
     }
 
@@ -213,7 +212,7 @@ public class Scanner
             }
         }
         string text = _GetTokenText();
-        Number number = new Number(Decimal.Parse(text));
+        Literal.Number number = new Literal.Number(Decimal.Parse(text));
         _tokens.Add(new Token(TokenType.NUMBER, text, number, _line));
     }
 
