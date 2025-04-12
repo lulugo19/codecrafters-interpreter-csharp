@@ -15,7 +15,7 @@ public abstract class Literal
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString().ToLower();
         }
     }
 
