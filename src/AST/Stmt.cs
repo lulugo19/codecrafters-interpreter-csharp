@@ -47,10 +47,6 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            if (!ctx.Vars.ContainsKey(Id.Lexeme))
-            {
-                throw new Exception($"Undefined variable '{Id.Lexeme}'");
-            }
             ctx.Vars.Add(Id.Lexeme, Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance));
         }
     }

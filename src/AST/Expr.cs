@@ -49,6 +49,10 @@ public abstract class Expr
 
         public override Expr Eval(Interpreter.Context ctx)
         {
+            if (!ctx.Vars.ContainsKey(Id.Lexeme))
+            {
+                throw new Exception($"Undefined variable '{Id.Lexeme}'");
+            }
             return ctx.Vars[Id.Lexeme];
         }
     }
