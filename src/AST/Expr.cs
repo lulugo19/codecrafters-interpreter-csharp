@@ -1,4 +1,5 @@
 
+using System.Formats.Asn1;
 using System.Net.Http.Headers;
 
 namespace AST;
@@ -95,11 +96,10 @@ public abstract class Expr
 
             public override Expr Eval()
             {
-                if (Expr.Eval() is Literal lit && lit.Value is AST.Literal.Boolean boolean)
-                {
-                    return new Expr.Literal(new AST.Literal.Boolean(!boolean.Value));
-                }
-                throw new Exception("Not a boolean");           
+                var val = Expr.Eval();
+                // false and nil is falsy and everything else is truthy
+                var falsy = val is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
+                return new Literal(new AST.Literal.Boolean(falsy));
             }
         }
     }
