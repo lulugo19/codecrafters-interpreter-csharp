@@ -27,6 +27,12 @@ public class Parser
         if (_Match(TokenType.FALSE)) return new Expr.Literal(new Literal.Boolean(false));
         if (_Match(TokenType.NUMBER)) return new Expr.Literal((Literal.Number)_Previous().Literal);
         if (_Match(TokenType.STRING)) return new Expr.Literal(new Literal.String(_Previous().Literal as string));
+        if (_Match(TokenType.LEFT_PAREN)) 
+        {
+            var primary = _Primary();
+            _Advance();
+            return primary;
+        }
 
         throw new Exception("Unknown token");
     }
@@ -39,6 +45,13 @@ public class Parser
     private Token _Advance()
     {
         return _tokens[_current++];
+    }
+
+    private Token _Expect(TokenType type)
+    {
+        if (_Check(type)) return _Advance();
+
+        throw new Exception($"Expected token '{type}' but got '{_Peek().Type}'");
     }
 
     private Token _Peek()
