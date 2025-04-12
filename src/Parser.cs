@@ -36,16 +36,30 @@ public class Parser
         return stmts;
     }
 
+    public Expr? ParseExpr()
+    {
+        _current = 0;
+        HasErrors = false;
+        try
+        {
+            return _Expr();
+        }
+        catch (ParserException e)
+        {
+            return null;
+        }       
+    }
+
     private Stmt _Stmt()
     {
         return _StmtPrint();
     }
 
-    public Stmt.Print _StmtPrint()
+    private Stmt.Print _StmtPrint()
     {
         if (_Match(TokenType.PRINT))
         {
-            var stmt = new Stmt.Print(_Expr());
+            var stmt = new Stmt.Print(ParseExpr()!);
             _Expect(TokenType.SEMICOLON);
             return stmt;
         }
@@ -65,28 +79,12 @@ public class Parser
         return new ParserException(msg);
     }
 
-
-
-    public Expr? ParseExpr()
-    {
-        _current = 0;
-        HasErrors = false;
-        try
-        {
-            return _Expr();
-        }
-        catch (ParserException e)
-        {
-            return null;
-        }       
-    }
-
-    public Expr _Expr()
+    private Expr _Expr()
     {
         return _ExprEqu();
     }
 
-    public Expr _ExprEqu()
+    private Expr _ExprEqu()
     {
         var expr = _ExprComp();
 
@@ -109,7 +107,7 @@ public class Parser
         return expr;
     }
 
-    public Expr _ExprComp()
+    private Expr _ExprComp()
     {
         var comp = _ExprTerm();
         while (true)
@@ -138,7 +136,7 @@ public class Parser
         return comp;
     }
 
-    public Expr _ExprTerm()
+    private Expr _ExprTerm()
     {
         var term = _ExprFactor();
         while (true)
@@ -159,7 +157,7 @@ public class Parser
         return term;
     }
 
-    public Expr _ExprFactor()
+    private Expr _ExprFactor()
     {
         var factor = _ExprUnary();
         while (true)
@@ -180,7 +178,7 @@ public class Parser
         return factor;
     }
 
-    public Expr _ExprUnary()
+    private Expr _ExprUnary()
     {
         if (_Match(TokenType.MINUS))
         {
@@ -196,7 +194,7 @@ public class Parser
         }      
     }
 
-    public Expr _ExprPrimary()
+    private Expr _ExprPrimary()
     {
         if (_Match(TokenType.NIL)) return new Expr.Literal(Literal.Nil.Instance);
         if (_Match(TokenType.TRUE)) return new Expr.Literal(new Literal.Boolean(true));
