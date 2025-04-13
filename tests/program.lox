@@ -1,6 +1,22 @@
-// First declaration of variable 'a' in global scope
-var a = "value";
+// This program uses for loops and block scopes<|SPACE|>// to print the updates to the same variable
+var bar = "after";
+{
+  var bar = "before";
 
-// Redeclaring 'a' with its own value should be allowed in global scope
-var a = a;
-print a; // this should print "value"
+  for (var bar = 0; bar < 1; bar = bar + 1) {
+    print bar;
+    var bar = -1;
+    print bar;
+  }
+}
+
+{
+  for (var bar = 0; bar > 0; bar = bar + 1) {}
+
+  var bar = "after";
+  print bar;
+
+  for (bar = 0; bar < 1; bar = bar + 1) {
+    print bar;
+  }
+}

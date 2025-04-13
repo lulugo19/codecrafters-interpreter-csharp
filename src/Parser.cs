@@ -262,6 +262,7 @@ public class Parser
     private Stmt.For _StmtFor()
     {
         _Expect(TokenType.LEFT_PAREN);
+        _declaredVariables.Push(new Dictionary<string, Token>());
         Stmt? init = null;
         Expr? cond = null;
         Stmt.Expr? incr = null;
@@ -288,6 +289,7 @@ public class Parser
             _Expect(TokenType.RIGHT_PAREN);
         }
         Stmt loopStmt = _Stmt();
+        _declaredVariables.Pop();
 
         return new Stmt.For(init, cond, incr, loopStmt);
     }

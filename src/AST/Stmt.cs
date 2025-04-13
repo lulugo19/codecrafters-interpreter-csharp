@@ -192,6 +192,7 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
+            ctx.StartBlockScope();
             Init?.Run(ctx);
             while (Cond?.Eval(ctx)?.ToBoolean() ?? true)
             {
@@ -202,6 +203,7 @@ public abstract class Stmt
                 }
                 Incr?.Run(ctx);
             }
+            ctx.EndBlockScope();
             return null;
         }
     }
