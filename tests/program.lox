@@ -1,2 +1,1 @@
-var quz;
-print quz;
+if (true) print "bar";

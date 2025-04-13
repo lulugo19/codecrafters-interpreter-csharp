@@ -61,11 +61,7 @@ public class Parser
         while (!_IsAtEnd())
         {
             var stmt = _Stmt();
-            stmts.Add(stmt);
-            if (stmt.EndsWithSemicolon)
-            {
-                _Expect(TokenType.SEMICOLON);
-            }          
+            stmts.Add(stmt);         
             if (_Peek().Type == TokenType.EOF || _Peek().Type == TokenType.RIGHT_BRACE)
             {
                 break;
@@ -76,23 +72,32 @@ public class Parser
 
     private Stmt _Stmt()
     {
+        Stmt? stmt = null;
         if (_Match(TokenType.PRINT))
         {
-            return _StmtPrint();
+            stmt = _StmtPrint();
         }
         else if (_Match(TokenType.VAR))
         {
-            return _StmtVarDecl();
+            stmt = _StmtVarDecl();
         }
         else if (_Match(TokenType.LEFT_BRACE))
         {
-            return _StmtBlock();
+            stmt = _StmtBlock();
         }
         else if (_Match(TokenType.IF))
         {
-            return _StmtIf();
+            stmt = _StmtIf();
         }
-        return _StmtExpr();
+        else
+        {
+            stmt = _StmtExpr();
+        }
+        if (stmt.EndsWithSemicolon)
+        {
+            _Expect(TokenType.SEMICOLON);
+        } 
+        return stmt;
     }
 
     private Stmt.Print _StmtPrint()
