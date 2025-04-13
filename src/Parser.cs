@@ -18,9 +18,10 @@ public class Parser
     private readonly string _source;
     private readonly List<Token> _tokens;
     private int _current = 0;
-    private int _currentScopeLevel = 0;
     private Stack<Dictionary<string, Token>> _declaredVariables =
          new Stack<Dictionary<string, Token>>();
+
+    private int _CurrentScopeLevel => _declaredVariables.Count - 1;
 
     private Token? _insideVarDeclaration = null;
 
@@ -34,7 +35,6 @@ public class Parser
     public AST.Program ParseProgram()
     {
         _current = 0;
-        _currentScopeLevel = 0;
         _declaredVariables.Clear();
         _declaredVariables.Push(new Dictionary<string, Token>());
         HasErrors = false;
@@ -109,14 +109,14 @@ public class Parser
     {
         var id = _Expect(TokenType.IDENTIFIER);
         _insideVarDeclaration = id;
-        if (_declaredVariables.Peek().ContainsKey(id.Lexeme))
+        if (_CurrentScopeLevel > 0 && _declaredVariables.Peek().ContainsKey(id.Lexeme))
         {
             Console.Error.WriteLine($"[line {id.Line}] Error at '{id.Lexeme}': Already an identifier with this name in this scope.");
             HasErrors = true;
         }
         else
         {
-            _declaredVariables.Peek().Add(id.Lexeme, id);
+            _declaredVariables.Peek().TryAdd(id.Lexeme, id);
         }
         Stmt.VarDecl? decl = null;
         if (_Match(TokenType.EQUAL))
@@ -135,7 +135,7 @@ public class Parser
     private Stmt.FunDecl _StmtFunDecl()
     {
         var id = _Expect(TokenType.IDENTIFIER);
-        if (_declaredVariables.Peek().ContainsKey(id.Lexeme))
+        if (_CurrentScopeLevel > 0 && _declaredVariables.Peek().ContainsKey(id.Lexeme))
         {
             Console.Error.WriteLine($"[line {id.Line}] Error at '{id.Lexeme}': Already an identifier with this name in this scope.");
             HasErrors = true;
@@ -154,7 +154,7 @@ public class Parser
             }
             else 
             {
-                _declaredVariables.Peek().Add(pId.Lexeme, pId);
+                _declaredVariables.Peek().TryAdd(pId.Lexeme, pId);
             }         
             if (_Peek().Type != TokenType.COMMA)
             {
@@ -217,12 +217,10 @@ public class Parser
 
     private Stmt.Block _StmtBlock(bool createNewVarScope = true)
     {
-        _currentScopeLevel++;
         if (createNewVarScope)
             _declaredVariables.Push(new Dictionary<string, Token>());
         var stmts = _Stmts();
         _Expect(TokenType.RIGHT_BRACE);
-        _currentScopeLevel--;
         if (createNewVarScope)
             _declaredVariables.Pop();
         return new Stmt.Block(stmts);
@@ -514,7 +512,7 @@ public class Parser
         {
             // parse function call
             var id = _Previous();
-            if (_currentScopeLevel > 0 && _insideVarDeclaration != null)
+            if (_CurrentScopeLevel > 0 && _insideVarDeclaration != null)
             {
                 if (id.Lexeme == _insideVarDeclaration.Lexeme)
                 {

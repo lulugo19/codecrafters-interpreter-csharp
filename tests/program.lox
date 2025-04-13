@@ -1,14 +1,6 @@
-var a = "1";
-print a;
+// First declaration of variable 'a' in global scope
+var a = "value";
 
-var a;
-print a;
-
-var a = "2";
-print a;
-
-{
-  var a = "1";
-  var a = "2";
-  print a;
-}
+// Redeclaring 'a' with its own value should be allowed in global scope
+var a = a;
+print a; // this should print "value"
