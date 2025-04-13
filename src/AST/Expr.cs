@@ -464,4 +464,29 @@ public abstract class Expr
             }
         }
     }
+
+    public class FuncCall : Expr
+    {
+        public Token Id {get; init;}
+
+        public FuncCall(Token id)
+        {
+            Id = id;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            switch (Id.Lexeme)
+            {
+                case "clock": return _Clock();
+                default: throw new NotImplementedException();
+            }
+        }
+
+        private Literal _Clock()
+        {
+             var elapsed = Convert.ToDecimal(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() / 1000);
+             return new Literal(new AST.Literal.Number(elapsed));
+        }
+    }
 }

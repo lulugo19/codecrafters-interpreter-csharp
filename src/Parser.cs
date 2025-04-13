@@ -380,7 +380,19 @@ public class Parser
         if (_Match(TokenType.FALSE)) return new Expr.Literal(new Literal.Boolean(false));
         if (_Match(TokenType.NUMBER)) return new Expr.Literal(new Literal.Number(((Number)_Previous().Literal).Value));
         if (_Match(TokenType.STRING)) return new Expr.Literal(new Literal.String(_Previous().Literal as string));
-        if (_Match(TokenType.IDENTIFIER)) return new Expr.Var(_Previous());
+        if (_Match(TokenType.IDENTIFIER))
+        {
+            var id = _Previous();
+            if (_Match(TokenType.LEFT_PAREN))
+            {
+                _Expect(TokenType.RIGHT_PAREN);
+                return new Expr.FuncCall(id);
+            }
+            else
+            {
+                 return new Expr.Var(id);
+            }
+        }
         if (_Match(TokenType.LEFT_PAREN)) 
         {
             var expr = _Expr();
