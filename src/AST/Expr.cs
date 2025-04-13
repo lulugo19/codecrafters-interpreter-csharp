@@ -438,5 +438,30 @@ public abstract class Expr
                 return $"(or {Left} {Right})";
             }
         }
+
+        public class And : Binary
+        {
+            public And(Expr left, Expr right) : base(left, right) {}
+
+            public override Expr Eval(Interpreter.Context ctx)
+            {
+                var leftVal = Left.Eval(ctx);
+                if (!leftVal.ToBoolean())
+                {
+                    return new Literal(new AST.Literal.Boolean(false));
+                }
+                var rightVal = Right.Eval(ctx);
+                if (!rightVal.ToBoolean())
+                {
+                    return new Literal(new AST.Literal.Boolean(false));
+                }
+                return rightVal;               
+            }
+
+            public override string ToString()
+            {
+                return $"(and {Left} {Right})";
+            }
+        }
     }
 }

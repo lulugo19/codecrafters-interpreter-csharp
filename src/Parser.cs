@@ -189,10 +189,10 @@ public class Parser
 
     private Expr _ExprOr()
     {
-        var expr = _ExprEqu();
+        var expr = _ExprAnd();
         while (_Match(TokenType.OR))
         {
-            expr = new Expr.Binary.Or(expr, _ExprEqu());
+            expr = new Expr.Binary.Or(expr, _ExprAnd());
         }
         return expr;
     }
@@ -202,7 +202,7 @@ public class Parser
         var expr = _ExprEqu();
         while (_Match(TokenType.AND))
         {
-            expr = new Expr.Binary.Or(expr, _ExprEqu());
+            expr = new Expr.Binary.And(expr, _ExprEqu());
         }
         return expr;
     }
