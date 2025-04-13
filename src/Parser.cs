@@ -62,7 +62,7 @@ public class Parser
         {
             var stmt = _Stmt();
             stmts.Add(stmt);
-            if (stmt is not Stmt.Block)
+            if (stmt.EndsWithSemicolon)
             {
                 _Expect(TokenType.SEMICOLON);
             }          

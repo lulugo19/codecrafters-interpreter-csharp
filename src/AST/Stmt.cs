@@ -4,12 +4,15 @@ public abstract class Stmt
 {
     public abstract void Run(Interpreter.Context ctx);
 
+    public bool EndsWithSemicolon {get; init;} = false;
+
     public class Print : Stmt
     {
         public AST.Expr Expr {get; init;}
 
         public Print(AST.Expr expr)
         {
+            EndsWithSemicolon = true;
             Expr = expr;
         }
 
@@ -25,6 +28,7 @@ public abstract class Stmt
 
         public Expr(AST.Expr expr)
         {
+            EndsWithSemicolon = true;
             E = expr;
         }
 
@@ -41,6 +45,7 @@ public abstract class Stmt
 
         public VarDecl(Token id, AST.Expr? val)
         {
+            EndsWithSemicolon = true;
             Id = id;
             Value = val;
         }
@@ -57,6 +62,7 @@ public abstract class Stmt
 
         public VarAsgn(AST.Expr.VarAsgn asgn)
         {
+            EndsWithSemicolon = true;
             Asgn = asgn;
         }
 
