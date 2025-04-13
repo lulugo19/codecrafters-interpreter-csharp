@@ -1,11 +1,22 @@
-// This program uses a for loop to print the numbers from 0 to 2
-// The loop initializer is ignored in this loop
-var baz = 0;
-for (; baz < 2; baz = baz + 1) print baz;
+// This program uses for loops and block scopes<|SPACE|>// to print the updates to the same variable
+var world = "after";
+{
+  var world = "before";
 
-// This program uses a for loop to print the numbers from 0 to 2
-// The loop increment clause is ignored in this loop
-for (var quz = 0; quz < 2;) {
-  print quz;
-  quz = quz + 1;
+  for (var world = 0; world < 1; world = world + 1) {
+    print world;
+    var world = -1;
+    print world;
+  }
+}
+
+{
+  for (var world = 0; world > 0; world = world + 1) {}
+
+  var world = "after";
+  print world;
+
+  for (world = 0; world < 1; world = world + 1) {
+    print world;
+  }
 }

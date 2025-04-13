@@ -105,17 +105,16 @@ public class Parser
         else
         {
             stmt = _StmtExpr();
-        }
-        if (stmt.EndsWithSemicolon)
-        {
             _Expect(TokenType.SEMICOLON);
-        } 
+        }
         return stmt;
     }
 
     private Stmt.Print _StmtPrint()
     {     
-        return new Stmt.Print(_Expr());  
+        var printStmt = new Stmt.Print(_Expr());
+        _Expect(TokenType.SEMICOLON);
+        return printStmt;
     }
 
     private Stmt.Expr _StmtExpr()
@@ -194,11 +193,8 @@ public class Parser
             else
             {
                 init = _StmtExpr();
-            }
-            if (!init.EndsWithSemicolon)
-            {
                 _Expect(TokenType.SEMICOLON);
-            }
+            }        
         }
         if (!_Match(TokenType.SEMICOLON))
         {
