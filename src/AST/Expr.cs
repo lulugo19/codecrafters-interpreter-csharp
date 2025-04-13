@@ -513,6 +513,10 @@ public abstract class Expr
 
         public virtual Expr? Run(Interpreter.Context ctx, FuncCall call)
         {
+            if (call.Args.Count != Params.Count)
+            {
+                throw new Exception($"Expected {Params.Count} arguments but got ${call.Args.Count}.");
+            }
             var evalArgs = call.Args.Select(arg => arg.Eval(ctx)).ToArray();
             BoundedContext.StartBlockScope();
             for (int i = 0; i < Params.Count; i++)
