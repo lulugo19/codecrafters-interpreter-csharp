@@ -59,13 +59,13 @@ public class Parser
     {
         var stmts = new List<Stmt>();
         while (!_IsAtEnd())
-        {
-            var stmt = _Stmt();
-            stmts.Add(stmt);         
+        {                
             if (_Peek().Type == TokenType.EOF || _Peek().Type == TokenType.RIGHT_BRACE)
             {
                 break;
             }
+            var stmt = _Stmt();
+            stmts.Add(stmt);   
         }
         return stmts;
     } 
@@ -92,6 +92,10 @@ public class Parser
         else if (_Match(TokenType.WHILE))
         {
             stmt = _StmtWhile();
+        }
+        else if (_Match(TokenType.FOR))
+        {
+            stmt = _StmtFor();
         }
         else
         {
@@ -165,6 +169,35 @@ public class Parser
         _Expect(TokenType.RIGHT_PAREN);
         var loopStmt = _Stmt();
         return new Stmt.While(cond, loopStmt);
+    }
+
+    private Stmt.For _StmtFor()
+    {
+        _Expect(TokenType.LEFT_PAREN);
+        Stmt? init = null;
+        Expr? cond = null;
+        Stmt.Expr? incr = null;
+        if (!_Match(TokenType.SEMICOLON))
+        {
+            init = _Stmt();
+            if (!init.EndsWithSemicolon)
+            {
+                _Expect(TokenType.SEMICOLON);
+            }
+        }
+        if (!_Match(TokenType.SEMICOLON))
+        {
+            cond = _Expr();
+            _Expect(TokenType.SEMICOLON);
+        }
+        if (!_Match(TokenType.RIGHT_PAREN))
+        {
+            incr = _StmtExpr();
+            _Expect(TokenType.RIGHT_PAREN);
+        }
+        Stmt loopStmt = _Stmt();
+
+        return new Stmt.For(init, cond, incr, loopStmt);
     }
 
     private ParserException _StmtError()

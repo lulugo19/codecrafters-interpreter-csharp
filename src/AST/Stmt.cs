@@ -159,4 +159,30 @@ public abstract class Stmt
             }
         }
     }
+
+    public class For : Stmt
+    {
+        public Stmt? Init {get; init;}
+        public AST.Expr? Cond {get; init;}
+        public Expr? Incr {get; init;}
+        public Stmt LoopStmt {get; init;}
+
+        public For(Stmt? init, AST.Expr? cond, Expr? incr, Stmt loopStmt)
+        {
+            Init = init;
+            Cond = cond;
+            Incr = incr;
+            LoopStmt = loopStmt;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            Init?.Run(ctx);
+            while (Cond?.Eval(ctx)?.ToBoolean() ?? true)
+            {
+                LoopStmt.Run(ctx);
+                Incr?.Run(ctx);
+            }
+        }
+    }
 }

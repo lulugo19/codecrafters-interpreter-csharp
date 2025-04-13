@@ -45,7 +45,7 @@ public class Interpreter
         public Expr AssignVar(Token identifier, Expr val)
         {
             string id = identifier.Lexeme;
-            foreach (var scope in Scopes.Reverse())
+            foreach (var scope in Scopes)
             {
                 if (scope.Vars.ContainsKey(id))
                 {
@@ -60,6 +60,15 @@ public class Interpreter
         public void DeclareVar(Token identifier, Expr val)
         {
             CurrentScope.Vars[identifier.Lexeme] = val.Eval(this);
+        }
+
+        public void OutputCurrentScope()
+        {
+            Console.WriteLine($"Current scope {Scopes.Count}: ");
+            foreach (var key in CurrentScope.Vars.Keys)
+            {
+                Console.WriteLine($"{key}={CurrentScope.Vars[key]}");
+            }
         }
     }
 
