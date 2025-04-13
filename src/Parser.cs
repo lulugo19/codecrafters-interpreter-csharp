@@ -408,8 +408,29 @@ public class Parser
         }
         else
         {
-            return _ExprPrimary();
+            return _ExprCall();
         }      
+    }
+
+    private Expr _ExprCall()
+    {
+        var expr = _ExprPrimary();
+        while (_Match(TokenType.LEFT_PAREN))
+        {
+            List<Expr> args = new List<Expr>();
+            while (!_Match(TokenType.RIGHT_PAREN))
+            {
+                args.Add(_Expr());
+                if (_Peek().Type != TokenType.COMMA)
+                {
+                    _Expect(TokenType.RIGHT_PAREN);
+                    break;
+                }
+                _Expect(TokenType.COMMA);
+            }
+            expr = new Expr.FuncCall(expr, args);
+        }
+        return expr;
     }
 
     private Expr _ExprPrimary()
@@ -438,25 +459,7 @@ public class Parser
         {
             // parse function call
             var id = _Previous();
-            if (_Match(TokenType.LEFT_PAREN))
-            {
-                List<Expr> args = new List<Expr>();
-                while (!_Match(TokenType.RIGHT_PAREN))
-                {
-                    args.Add(_Expr());
-                    if (_Peek().Type != TokenType.COMMA)
-                    {
-                        _Expect(TokenType.RIGHT_PAREN);
-                        break;
-                    }
-                    _Expect(TokenType.COMMA);
-                }
-                return new Expr.FuncCall(id, args);
-            }
-            else
-            {
-                 return new Expr.Var(id);
-            }
+            return new Expr.Var(id);         
         }
         if (_Match(TokenType.LEFT_PAREN)) 
         {

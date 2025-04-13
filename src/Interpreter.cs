@@ -52,27 +52,6 @@ public class Interpreter
             throw new Exception($"Undefined variable '{id}'");
         }
 
-        public Expr? CallFunction(Expr.FuncCall call)
-        {
-            string id = call.Id.Lexeme;
-            foreach (var scope in Scopes)
-            {
-                scope.Vars.TryGetValue(id, out Expr? var);
-                if (var != null)
-                {
-                    if (var is Expr.Fun fun)
-                    {
-                        return fun.Run(this, call);
-                    }
-                    else
-                    {
-                        throw new Exception($"'{id}' is not a function");
-                    }
-                }
-            }
-            throw new Exception($"Undefined function '{id}'");
-        }
-
         public Expr AssignVar(Token identifier, Expr val)
         {
             string id = identifier.Lexeme;

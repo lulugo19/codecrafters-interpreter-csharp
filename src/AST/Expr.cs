@@ -467,28 +467,26 @@ public abstract class Expr
 
     public class FuncCall : Expr
     {
-        public Token Id {get; init;}
+        public Expr Fun {get; init;}
         public List<Expr> Args {get; init;}
 
-        public FuncCall(Token id, List<Expr> args)
+        public FuncCall(Expr fun, List<Expr> args)
         {
-            Id = id;
+            Fun = fun;
             Args = args;
         }
 
         public override Expr Eval(Interpreter.Context ctx)
         {
-            switch (Id.Lexeme)
+            var funVal = Fun.Eval(ctx);
+            if (funVal is Expr.Fun fun)
             {
-                case "clock": return _Clock();
-                default: return ctx.CallFunction(this) ?? new Literal(AST.Literal.Nil.Instance);
+                return fun.Run(ctx, this) ?? new Literal(AST.Literal.Nil.Instance);
             }
-        }
-
-        private Literal _Clock()
-        {
-             var elapsed = Convert.ToDecimal(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() / 1000);
-             return new Literal(new AST.Literal.Number(elapsed));
+            else
+            {
+                throw new Exception($"{funVal} is not a function");
+            }
         }
     }
 
@@ -510,7 +508,7 @@ public abstract class Expr
             return this;
         }
 
-        public Expr? Run(Interpreter.Context ctx, FuncCall call)
+        public virtual Expr? Run(Interpreter.Context ctx, FuncCall call)
         {
             ctx.RetVal = null;
             ctx.StartBlockScope();
@@ -534,6 +532,21 @@ public abstract class Expr
         public override string? ToOutput()
         {
             return $"<fn {Id.Lexeme}>";
+        }
+
+        public class Clock : Fun
+        {
+            public Clock() : base(
+                    new Token(TokenType.IDENTIFIER, "clock", null, 0), 
+                    new List<Token>(),
+                    null
+                ) {}
+
+            public override Expr? Run(Interpreter.Context ctx, FuncCall call)
+            {
+                var elapsed = Convert.ToDecimal(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() / 1000);
+                return new Literal(new AST.Literal.Number(elapsed));
+            }
         }
     }
 }
