@@ -74,6 +74,11 @@ public abstract class Expr
         {
             return ctx.AssignVar(Id, Val);
         }
+
+        public override string ToString()
+        {
+            return $"(= {Id.Lexeme} {Val})";
+        }
     }
 
     public class Group : Expr
@@ -416,17 +421,21 @@ public abstract class Expr
             public override Expr Eval(Interpreter.Context ctx)
             {
                 var leftVal = Left.Eval(ctx);
-                var rightVal = Right.Eval(ctx);
-
                 if (leftVal.ToBoolean())
                 {
                     return leftVal;
                 }
+                var rightVal = Right.Eval(ctx);
                 if (rightVal.ToBoolean())
                 {
                     return rightVal;
                 }
                 return new Literal(new AST.Literal.Boolean(false));
+            }
+
+            public override string ToString()
+            {
+                return $"(or {Left} {Right})";
             }
         }
     }

@@ -1,1 +1,1 @@
-print nil or "ok";
+(a = false) or (b = true) or (a = "foo")
