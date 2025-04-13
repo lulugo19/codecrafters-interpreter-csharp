@@ -4,7 +4,19 @@ public class Interpreter
 {
     public class Scope
     {
+        public Scope() {}
+
+        public Scope(Dictionary<string, Expr> vars)
+        {
+            Vars = vars;
+        }
+
         public  Dictionary<string, Expr> Vars {get; init;} = new Dictionary<string, Expr>();
+        
+        public Scope Copy()
+        {
+            return new Scope() { Vars = new(Vars) };
+        }
     }
 
     [Flags]
@@ -26,6 +38,28 @@ public class Interpreter
         public Context()
         {
             Scopes.Push(new Scope());
+            CurrentScope.Vars.Add("clock", Expr.Fun.Clock.Instance);
+        }
+
+        public Context(Dictionary<string, Expr> vars)
+        {
+            Scopes.Push(new Scope(vars));
+        }
+
+        public Context Copy()
+        {
+            Dictionary<string, Expr> vars = new Dictionary<string, Expr>();
+            foreach (var scope in Scopes)
+            {
+                foreach (var key in scope.Vars.Keys)
+                {
+                    if (!vars.ContainsKey(key))
+                    {
+                        vars.Add(key, scope.Vars[key]);
+                    }
+                }
+            }
+            return new Context(vars);
         }
 
         public void StartBlockScope()

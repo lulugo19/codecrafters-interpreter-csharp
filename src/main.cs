@@ -91,6 +91,7 @@ int Run()
     catch (Exception e)
     {
         Console.Error.WriteLine(e.Message);
+        Console.Error.WriteLine(e.StackTrace);
         return 70;
     }
 }

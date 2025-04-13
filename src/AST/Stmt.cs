@@ -56,16 +56,21 @@ public abstract class Stmt
 
     public class FunDecl : Stmt
     {
-        public AST.Expr.Fun Fun {get; init;}
+        public Token Id {get; init;}
+        public List<Token> Params {get; init;}
+        public Block Body {get; init;}
 
-        public FunDecl(AST.Expr.Fun fun)
+        public FunDecl(Token id, List<Token> param, Block body)
         {
-            Fun = fun;
+            Id = id;
+            Params = param;
+            Body = body;
         }
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            ctx.DeclareVar(Fun.Id, Fun);
+            var fun = new AST.Expr.Fun(Id, Params, Body, ctx.Copy());
+            ctx.DeclareVar(Id, fun);    
             return null;
         }
     }
@@ -88,7 +93,7 @@ public abstract class Stmt
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
                 {
                     ctx.Flags &= Interpreter.Flags.RETURN;
-                    return ctx.RetVal;
+                    break;
                 }
             }
             ctx.EndBlockScope();

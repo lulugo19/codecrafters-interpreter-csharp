@@ -1,4 +1,5 @@
 
+using System.ComponentModel;
 using System.Data.Common;
 using System.Formats.Asn1;
 using System.Net.Http.Headers;
@@ -496,11 +497,14 @@ public abstract class Expr
         public List<Token> Params {get; init;}
         public Stmt.Block Body {get; init;}
 
-        public Fun(Token id, List<Token> param, Stmt.Block body)
+        public Interpreter.Context BoundedContext {get; set;} = new Interpreter.Context();
+
+        public Fun(Token id, List<Token> param, Stmt.Block body, Interpreter.Context bContext)
         {
             Id = id;
             Params = param;
             Body = body;
+            BoundedContext = bContext;
         }
 
         public override Expr Eval(Interpreter.Context ctx)
@@ -510,23 +514,23 @@ public abstract class Expr
 
         public virtual Expr? Run(Interpreter.Context ctx, FuncCall call)
         {
-            ctx.RetVal = null;
-            ctx.StartBlockScope();
+            var evalArgs = call.Args.Select(arg => arg.Eval(ctx)).ToArray();
+            BoundedContext.StartBlockScope();
             for (int i = 0; i < Params.Count; i++)
             {
-                ctx.DeclareVar(Params[i], call.Args[i]);
+                BoundedContext.DeclareVar(Params[i], evalArgs[i]);
             }
-            foreach (var stmt in this.Body.Stmts)
+            foreach (var stmt in Body.Stmts)
             {
-                stmt.Run(ctx);
-                if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
+                stmt.Run(BoundedContext);
+                if ((BoundedContext.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
                 {
-                    ctx.Flags &= ~Interpreter.Flags.RETURN;
+                    BoundedContext.Flags &= ~Interpreter.Flags.RETURN;
                     break;
                 }
             }
-            ctx.EndBlockScope();
-            return ctx.RetVal;
+            BoundedContext.EndBlockScope();
+            return BoundedContext.RetVal;
         }
 
         public override string? ToOutput()
@@ -536,10 +540,13 @@ public abstract class Expr
 
         public class Clock : Fun
         {
+            public static Clock Instance {get; } = new Clock();
+
             public Clock() : base(
                     new Token(TokenType.IDENTIFIER, "clock", null, 0), 
                     new List<Token>(),
-                    null
+                    null,
+                    new Interpreter.Context()
                 ) {}
 
             public override Expr? Run(Interpreter.Context ctx, FuncCall call)

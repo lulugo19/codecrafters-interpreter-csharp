@@ -117,7 +117,7 @@ public class Parser
         _Expect(TokenType.LEFT_BRACE);
         var body = _StmtBlock();
 
-        return new Stmt.FunDecl(new Expr.Fun(id, param, body));
+        return new Stmt.FunDecl(id, param, body);
     }
 
     private Stmt _Stmt()
