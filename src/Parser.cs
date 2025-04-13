@@ -76,7 +76,38 @@ public class Parser
         {
             return _StmtVarDecl();
         }
+        else if (_Match(TokenType.FUN))
+        {
+            return _StmtFunDecl();
+        }
         return _Stmt();
+    }
+
+    private Stmt.VarDecl _StmtVarDecl()
+    {
+        var id = _Expect(TokenType.IDENTIFIER);
+        Stmt.VarDecl? decl = null;
+        if (_Match(TokenType.EQUAL))
+        {
+            decl = new Stmt.VarDecl(id, _Expr());
+        }
+        else
+        {
+            decl = new Stmt.VarDecl(id, null);
+        }
+        _Expect(TokenType.SEMICOLON);
+        return decl;         
+    }
+
+    private Stmt.FunDecl _StmtFunDecl()
+    {
+        var id = _Expect(TokenType.IDENTIFIER);
+        _Expect(TokenType.LEFT_PAREN);
+        _Expect(TokenType.RIGHT_PAREN);
+        _Expect(TokenType.LEFT_BRACE);
+        var body = _StmtBlock();
+
+        return new Stmt.FunDecl(new Expr.Fun(id, body));
     }
 
     private Stmt _Stmt()
@@ -120,22 +151,6 @@ public class Parser
     private Stmt.Expr _StmtExpr()
     { 
         return new Stmt.Expr(_Expr());
-    }
-
-    private Stmt.VarDecl _StmtVarDecl()
-    {
-        var id = _Expect(TokenType.IDENTIFIER);
-        Stmt.VarDecl? decl = null;
-        if (_Match(TokenType.EQUAL))
-        {
-            decl = new Stmt.VarDecl(id, _Expr());
-        }
-        else
-        {
-            decl = new Stmt.VarDecl(id, null);
-        }
-        _Expect(TokenType.SEMICOLON);
-        return decl;         
     }
 
     private Stmt.Block _StmtBlock()

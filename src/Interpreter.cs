@@ -5,6 +5,7 @@ public class Interpreter
     public class Scope
     {
         public  Dictionary<string, Expr> Vars {get; init;} = new Dictionary<string, Expr>();
+        public  Dictionary<string, Stmt.FunDecl> Funs {get; init;} = new Dictionary<string, Stmt.FunDecl>();
     }
 
     public class Context
@@ -40,6 +41,25 @@ public class Interpreter
                 }
             }
             throw new Exception($"Undefined variable '{id}'");
+        }
+
+        public Expr? CallFunction(Token identifier)
+        {
+            string id = identifier.Lexeme;
+            foreach (var scope in Scopes)
+            {
+                scope.Funs.TryGetValue(id, out Stmt.FunDecl? fun);
+                if (fun != null)
+                {
+                    return fun.Fun.Body.Run(this);
+                }
+            }
+            throw new Exception($"Undefined function '{id}'");
+        }
+
+        public void DeclareFun(Token identifier, Stmt.FunDecl fun)
+        {
+            CurrentScope.Funs[identifier.Lexeme] = fun;
         }
 
         public Expr AssignVar(Token identifier, Expr val)

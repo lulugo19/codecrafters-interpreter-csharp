@@ -2,7 +2,7 @@ namespace AST;
 
 public abstract class Stmt
 {
-    public abstract void Run(Interpreter.Context ctx);
+    public abstract AST.Expr? Run(Interpreter.Context ctx);
 
     public class Print : Stmt
     {
@@ -13,9 +13,10 @@ public abstract class Stmt
             Expr = expr;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             Console.WriteLine(Expr.Eval(ctx).ToOutput());
+            return null;
         }
     }
 
@@ -28,9 +29,10 @@ public abstract class Stmt
             E = expr;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             E.Eval(ctx);
+            return null;
         }
     }
 
@@ -45,9 +47,27 @@ public abstract class Stmt
             Value = val;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             ctx.DeclareVar(Id,  Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance));
+            return null;
+        }
+    }
+
+    public class FunDecl : Stmt
+    {
+        public AST.Expr.Fun Fun {get; init;}
+
+        public FunDecl(AST.Expr.Fun fun)
+        {
+            Fun = fun;
+        }
+
+        public override AST.Expr? Run(Interpreter.Context ctx)
+        {
+            ctx.DeclareFun(Fun.Id, this);
+            ctx.DeclareVar(Fun.Id, Fun);
+            return null;
         }
     }
 
@@ -60,7 +80,7 @@ public abstract class Stmt
             Stmts = stmts;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             ctx.StartBlockScope();
             foreach (var stmt in Stmts)
@@ -68,6 +88,7 @@ public abstract class Stmt
                 stmt.Run(ctx);
             }
             ctx.EndBlockScope();
+            return null;
         }
     }
 
@@ -98,7 +119,7 @@ public abstract class Stmt
             Else = elseStmt;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             if (Cond.Eval(ctx).ToBoolean())
             {
@@ -116,6 +137,7 @@ public abstract class Stmt
                     Else.Run(ctx);
                 }
             }
+            return null;
         }       
     }
 
@@ -130,12 +152,13 @@ public abstract class Stmt
             LoopStmt = loopStmt;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             while (Cond.Eval(ctx).ToBoolean())
             {
                 LoopStmt.Run(ctx);
             }
+            return null;
         }
     }
 
@@ -154,7 +177,7 @@ public abstract class Stmt
             LoopStmt = loopStmt;
         }
 
-        public override void Run(Interpreter.Context ctx)
+        public override AST.Expr? Run(Interpreter.Context ctx)
         {
             Init?.Run(ctx);
             while (Cond?.Eval(ctx)?.ToBoolean() ?? true)
@@ -162,6 +185,7 @@ public abstract class Stmt
                 LoopStmt.Run(ctx);
                 Incr?.Run(ctx);
             }
+            return null;
         }
     }
 }

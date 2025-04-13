@@ -479,7 +479,7 @@ public abstract class Expr
             switch (Id.Lexeme)
             {
                 case "clock": return _Clock();
-                default: throw new NotImplementedException();
+                default: return ctx.CallFunction(Id) ?? new Literal(AST.Literal.Nil.Instance);
             }
         }
 
@@ -487,6 +487,28 @@ public abstract class Expr
         {
              var elapsed = Convert.ToDecimal(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() / 1000);
              return new Literal(new AST.Literal.Number(elapsed));
+        }
+    }
+
+    public class Fun : Expr
+    {
+        public Token Id {get; init;}
+        public Stmt.Block Body {get; init;}
+
+        public Fun(Token id, Stmt.Block body)
+        {
+            Id = id;
+            Body = body;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            return this;
+        }
+
+        public override string? ToOutput()
+        {
+            return $"<fn {Id.Lexeme}>";
         }
     }
 }
