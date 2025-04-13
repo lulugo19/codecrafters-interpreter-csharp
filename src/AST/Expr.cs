@@ -13,6 +13,12 @@ public abstract class Expr
         return ToString();
     }
 
+    public bool ToBoolean()
+    {
+        var isFalsy = this is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
+        return !isFalsy;
+    }
+
     public class Literal : Expr
     {
         public AST.Literal Value {get; init;}
@@ -129,10 +135,7 @@ public abstract class Expr
 
             public override Expr Eval(Interpreter.Context ctx)
             {
-                var val = Expr.Eval(ctx);
-                // false and nil is falsy and everything else is truthy
-                var falsy = val is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
-                return new Literal(new AST.Literal.Boolean(falsy));
+                return new Literal(new AST.Literal.Boolean(!Expr.Eval(ctx).ToBoolean()));
             }
         }
     }
@@ -415,17 +418,15 @@ public abstract class Expr
                 var leftVal = Left.Eval(ctx);
                 var rightVal = Right.Eval(ctx);
 
-                var falsyLeft = leftVal is Literal litLeft && (litLeft.Value is AST.Literal.Boolean b1 && !b1.Value || litLeft.Value is AST.Literal.Nil);
-                if (!falsyLeft)
+                if (leftVal.ToBoolean())
                 {
                     return leftVal;
                 }
-                var falsyRight = rightVal is Literal litRight && (litRight.Value is AST.Literal.Boolean b2 && !b2.Value || litRight.Value is AST.Literal.Nil);
-                if (!falsyRight)
+                if (rightVal.ToBoolean())
                 {
                     return rightVal;
                 }
-                return new Expr.Literal(new AST.Literal.Boolean(false));
+                return new Literal(new AST.Literal.Boolean(false));
             }
         }
     }

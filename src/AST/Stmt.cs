@@ -121,13 +121,13 @@ public abstract class Stmt
 
         public override void Run(Interpreter.Context ctx)
         {
-            if (_IsTrue(ctx, Cond))
+            if (Cond.Eval(ctx).ToBoolean())
             {
                 WhenTrue.Run(ctx);
             }
             else
             {
-                var trueElseIf = ElseIfs.FirstOrDefault(ei => _IsTrue(ctx, ei.Cond));
+                var trueElseIf = ElseIfs.FirstOrDefault(ei => ei.Cond.Eval(ctx).ToBoolean());
                 if (trueElseIf != null)
                 {
                     trueElseIf.WhenTrue.Run(ctx);
@@ -137,11 +137,6 @@ public abstract class Stmt
                     Else.Run(ctx);
                 }
             }
-        }
-
-        private bool _IsTrue(Interpreter.Context ctx, AST.Expr cond)
-        {
-            return ((Literal.Boolean)(((AST.Expr.Literal)cond.Eval(ctx)).Value)).Value;
-        }
+        }       
     }
 }
