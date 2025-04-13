@@ -375,11 +375,26 @@ public class Parser
 
     private Expr _ExprPrimary()
     {
-        if (_Match(TokenType.NIL)) return new Expr.Literal(Literal.Nil.Instance);
-        if (_Match(TokenType.TRUE)) return new Expr.Literal(new Literal.Boolean(true));
-        if (_Match(TokenType.FALSE)) return new Expr.Literal(new Literal.Boolean(false));
-        if (_Match(TokenType.NUMBER)) return new Expr.Literal(new Literal.Number(((Number)_Previous().Literal).Value));
-        if (_Match(TokenType.STRING)) return new Expr.Literal(new Literal.String(_Previous().Literal as string));
+        if (_Match(TokenType.NIL))
+        {
+            return new Expr.Literal(Literal.Nil.Instance);
+        } 
+        if (_Match(TokenType.TRUE))
+        {
+            return new Expr.Literal(new Literal.Boolean(true));
+        }
+        if (_Match(TokenType.FALSE))
+        {
+            return new Expr.Literal(new Literal.Boolean(false));
+        }
+        if (_Match(TokenType.NUMBER))
+        {
+            return new Expr.Literal(new Literal.Number(((Number)_Previous().Literal).Value));
+        } 
+        if (_Match(TokenType.STRING))
+        {
+            return new Expr.Literal(new Literal.String(_Previous().Literal as string));
+        }
         if (_Match(TokenType.IDENTIFIER))
         {
             var id = _Previous();

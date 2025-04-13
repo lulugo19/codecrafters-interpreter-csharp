@@ -203,14 +203,14 @@ public class Scanner
         while (!_IsAtEnd() && char.IsDigit(_Peek() ?? ' '))
         {
             _Advance();
-            if (_Peek() == '.' && char.IsDigit(_PeekNext() ?? ' '))
-            {
-                _Advance();
-            }
-            else if (!char.IsDigit(_Peek() ?? ' '))
-            {
-                break;
-            }
+        }
+        if (_Peek() == '.' && char.IsDigit(_PeekNext() ?? ' '))
+        {
+            _Advance();
+        }
+        while (!_IsAtEnd() && char.IsDigit(_Peek() ?? ' '))
+        {
+            _Advance();
         }
         string text = _GetTokenText();
         Number number = new Number(Decimal.Parse(text, CultureInfo.InvariantCulture));
