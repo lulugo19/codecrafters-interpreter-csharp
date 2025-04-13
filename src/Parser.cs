@@ -88,6 +88,10 @@ public class Parser
         {
             return _StmtBlock();
         }
+        else if (_Match(TokenType.IF))
+        {
+            return _StmtIf();
+        }
         return _StmtExpr();
     }
 
@@ -119,6 +123,30 @@ public class Parser
         var stmts = _Stmts();
         _Expect(TokenType.RIGHT_BRACE);
         return new Stmt.Block(stmts);
+    }
+
+    private Stmt.If _StmtIf()
+    {
+        _Expect(TokenType.LEFT_PAREN);
+        var cond = _Expr();
+        _Expect(TokenType.RIGHT_PAREN);
+        var whenTrue = _Stmt();
+        var elseIfs = new List<Stmt.If.ElseIf>();
+        while (_Peek().Type == TokenType.ELSE && _PeekNext().Type == TokenType.IF)
+        {
+            _Advance();
+            _Advance();
+            var condElseIf = _Expr();
+            var stmtElseIf = _Stmt();
+            var elseIf = new Stmt.If.ElseIf(condElseIf, stmtElseIf);
+            elseIfs.Add(elseIf);
+        }
+        Stmt? elseStmt = null;
+        if (_Match(TokenType.ELSE))
+        {
+            elseStmt = _Stmt();
+        }
+        return new Stmt.If(cond, whenTrue, elseIfs, elseStmt);
     }
 
     private ParserException _StmtError()

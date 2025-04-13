@@ -86,4 +86,56 @@ public abstract class Stmt
         }
     }
 
+    public class If : Stmt
+    {
+        public class ElseIf
+        {
+            public AST.Expr Cond {get; init;}
+            public Stmt WhenTrue {get; init;}
+
+            public ElseIf(AST.Expr cond, Stmt whenTrue)
+            {
+                Cond = cond;
+                WhenTrue = whenTrue;
+            }
+        }
+
+        public AST.Expr Cond {get; init;}
+        public Stmt WhenTrue {get; init;}
+        public List<ElseIf> ElseIfs {get; init;}
+        public Stmt? Else {get; init;}
+
+        public If(AST.Expr cond, Stmt whenTrue, List<ElseIf> elseIfs, Stmt? elseStmt)
+        {
+            Cond = cond;
+            WhenTrue = whenTrue;
+            ElseIfs = elseIfs;
+            Else = elseStmt;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            if (_IsTrue(ctx, Cond))
+            {
+                WhenTrue.Run(ctx);
+            }
+            else
+            {
+                var trueElseIf = ElseIfs.FirstOrDefault(ei => _IsTrue(ctx, ei.Cond));
+                if (trueElseIf != null)
+                {
+                    trueElseIf.WhenTrue.Run(ctx);
+                }
+                else if (Else != null)
+                {
+                    Else.Run(ctx);
+                }
+            }
+        }
+
+        private bool _IsTrue(Interpreter.Context ctx, AST.Expr cond)
+        {
+            return ((Literal.Boolean)(((AST.Expr.Literal)cond.Eval(ctx)).Value)).Value;
+        }
+    }
 }
