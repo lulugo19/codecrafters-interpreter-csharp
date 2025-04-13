@@ -139,10 +139,10 @@ public class Interpreter
         }
     }
 
-    public void Run(List<Stmt> program)
+    public void Run(AST.Program program)
     {
         Context ctx = new Context();
-        foreach (var stmt in program)
+        foreach (var stmt in program.Stmts)
         {
             stmt.Run(ctx);
         }

@@ -11,20 +11,21 @@ public class Parser
 
     private readonly string _source;
     private readonly List<Token> _tokens;
-    private int _current;
+    private int _current = 0;
+    private int _currentScopeLevel = 0;
+    private Token? _insideVarDeclaration = null;
 
     public bool HasErrors {get; private set;} = false;
 
     public Parser(string source)
     {
-        _source = source;
-        _current = 0;
         _tokens = new Scanner(source).ScanTokens();
     }
 
-    public List<Stmt> ParseProgram()
+    public AST.Program ParseProgram()
     {
         _current = 0;
+        _currentScopeLevel = 0;
         HasErrors = false;
         var stmts = new List<Stmt>();
         try 
@@ -36,7 +37,7 @@ public class Parser
             HasErrors = true;
             Console.Error.Write(e.Message);
         }
-        return stmts;
+        return new AST.Program(stmts);
     }
 
     public Expr? ParseExpr()
@@ -64,8 +65,18 @@ public class Parser
             {
                 break;
             }
-            var stmt = _StmtDeclr();
-            stmts.Add(stmt);   
+            try 
+            {
+                stmts.Add(_StmtDeclr());   
+            }
+            catch(ParserException e)
+            {
+                HasErrors = true;
+                Console.Error.Write(e.Message);
+
+                // try recovering going to next semicolon
+                while (!_IsAtEnd() && _Advance().Type != TokenType.SEMICOLON);
+            }                    
         }
         return stmts;
     }
@@ -86,6 +97,7 @@ public class Parser
     private Stmt.VarDecl _StmtVarDecl()
     {
         var id = _Expect(TokenType.IDENTIFIER);
+        _insideVarDeclaration = id;
         Stmt.VarDecl? decl = null;
         if (_Match(TokenType.EQUAL))
         {
@@ -96,6 +108,7 @@ public class Parser
             decl = new Stmt.VarDecl(id, null);
         }
         _Expect(TokenType.SEMICOLON);
+        _insideVarDeclaration = null;
         return decl;         
     }
 
@@ -168,8 +181,10 @@ public class Parser
 
     private Stmt.Block _StmtBlock()
     {
+        _currentScopeLevel++;
         var stmts = _Stmts();
         _Expect(TokenType.RIGHT_BRACE);
+        _currentScopeLevel--;
         return new Stmt.Block(stmts);
     }
 
@@ -459,6 +474,13 @@ public class Parser
         {
             // parse function call
             var id = _Previous();
+            if (_currentScopeLevel > 0 && _insideVarDeclaration != null)
+            {
+                if (id.Lexeme == _insideVarDeclaration.Lexeme)
+                {
+                    throw new ParserException($"[line {id.Line}] Error at '{id.Lexeme}': Attempting to declare local variable '{id.Lexeme}' initialized with itself");
+                }
+            }
             return new Expr.Var(id);         
         }
         if (_Match(TokenType.LEFT_PAREN)) 
