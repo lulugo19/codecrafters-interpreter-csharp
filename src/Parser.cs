@@ -74,9 +74,7 @@ public class Parser
     {
         if (_Match(TokenType.VAR))
         {
-            var stmt = _StmtVarDecl();
-            _Expect(TokenType.SEMICOLON);
-            return stmt;
+            return _StmtVarDecl();
         }
         return _Stmt();
     }

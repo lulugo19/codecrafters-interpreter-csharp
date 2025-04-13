@@ -1,1 +1,11 @@
-for (var world = 0; world < 3;) print world = world + 1;
+// This program uses a for loop to print the numbers from 0 to 2
+// The loop initializer is ignored in this loop
+var baz = 0;
+for (; baz < 2; baz = baz + 1) print baz;
+
+// This program uses a for loop to print the numbers from 0 to 2
+// The loop increment clause is ignored in this loop
+for (var quz = 0; quz < 2;) {
+  print quz;
+  quz = quz + 1;
+}
