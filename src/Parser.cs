@@ -64,11 +64,22 @@ public class Parser
             {
                 break;
             }
-            var stmt = _Stmt();
+            var stmt = _StmtDeclr();
             stmts.Add(stmt);   
         }
         return stmts;
-    } 
+    }
+
+    private Stmt _StmtDeclr()
+    {
+        if (_Match(TokenType.VAR))
+        {
+            var stmt = _StmtVarDecl();
+            _Expect(TokenType.SEMICOLON);
+            return stmt;
+        }
+        return _Stmt();
+    }
 
     private Stmt _Stmt()
     {
@@ -76,10 +87,6 @@ public class Parser
         if (_Match(TokenType.PRINT))
         {
             stmt = _StmtPrint();
-        }
-        else if (_Match(TokenType.VAR))
-        {
-            stmt = _StmtVarDecl();
         }
         else if (_Match(TokenType.LEFT_BRACE))
         {
@@ -179,7 +186,14 @@ public class Parser
         Stmt.Expr? incr = null;
         if (!_Match(TokenType.SEMICOLON))
         {
-            init = _Stmt();
+            if (_Match(TokenType.VAR))
+            {
+                init = _StmtVarDecl();
+            }
+            else
+            {
+                init = _StmtExpr();
+            }
             if (!init.EndsWithSemicolon)
             {
                 _Expect(TokenType.SEMICOLON);
@@ -206,10 +220,9 @@ public class Parser
         var msg = "No valid statement";
         if (_current > 0) 
         {          
-            var token = _Previous();
+            var token = _Peek();
             msg = $"[line {token.Line}] Error at '{token.Lexeme}': Expect statement.";
-        }      
-        Console.Error.WriteLine(msg);
+        }     
         return new ParserException(msg);
     }
 
@@ -386,10 +399,9 @@ public class Parser
         var msg = "No valid expression";
         if (_current > 0) 
         {          
-            var token = _Previous();
+            var token = _Peek();
             msg = $"[line {token.Line}] Error at '{token.Lexeme}': Expect expression.";
-        }      
-        Console.Error.WriteLine(msg);
+        }
         return new ParserException(msg);
     }
 
