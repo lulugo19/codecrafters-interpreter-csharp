@@ -65,7 +65,6 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            ctx.DeclareFun(Fun.Id, this);
             ctx.DeclareVar(Fun.Id, Fun);
             return null;
         }

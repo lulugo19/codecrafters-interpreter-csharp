@@ -103,11 +103,21 @@ public class Parser
     {
         var id = _Expect(TokenType.IDENTIFIER);
         _Expect(TokenType.LEFT_PAREN);
-        _Expect(TokenType.RIGHT_PAREN);
+        var param = new List<Token>();
+        while (!_Match(TokenType.RIGHT_PAREN))
+        {
+            param.Add(_Expect(TokenType.IDENTIFIER));
+            if (_Peek().Type != TokenType.COMMA)
+            {
+                _Expect(TokenType.RIGHT_PAREN);
+                break;
+            }
+            _Expect(TokenType.COMMA);
+        }
         _Expect(TokenType.LEFT_BRACE);
         var body = _StmtBlock();
 
-        return new Stmt.FunDecl(new Expr.Fun(id, body));
+        return new Stmt.FunDecl(new Expr.Fun(id, param, body));
     }
 
     private Stmt _Stmt()
@@ -412,11 +422,22 @@ public class Parser
         }
         if (_Match(TokenType.IDENTIFIER))
         {
+            // parse function call
             var id = _Previous();
             if (_Match(TokenType.LEFT_PAREN))
             {
-                _Expect(TokenType.RIGHT_PAREN);
-                return new Expr.FuncCall(id);
+                List<Expr> args = new List<Expr>();
+                while (!_Match(TokenType.RIGHT_PAREN))
+                {
+                    args.Add(_Expr());
+                    if (_Peek().Type != TokenType.COMMA)
+                    {
+                        _Expect(TokenType.RIGHT_PAREN);
+                        break;
+                    }
+                    _Expect(TokenType.COMMA);
+                }
+                return new Expr.FuncCall(id, args);
             }
             else
             {

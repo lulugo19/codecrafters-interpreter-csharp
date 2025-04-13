@@ -468,10 +468,12 @@ public abstract class Expr
     public class FuncCall : Expr
     {
         public Token Id {get; init;}
+        public List<Expr> Args {get; init;}
 
-        public FuncCall(Token id)
+        public FuncCall(Token id, List<Expr> args)
         {
             Id = id;
+            Args = args;
         }
 
         public override Expr Eval(Interpreter.Context ctx)
@@ -479,7 +481,7 @@ public abstract class Expr
             switch (Id.Lexeme)
             {
                 case "clock": return _Clock();
-                default: return ctx.CallFunction(Id) ?? new Literal(AST.Literal.Nil.Instance);
+                default: return ctx.CallFunction(this) ?? new Literal(AST.Literal.Nil.Instance);
             }
         }
 
@@ -493,17 +495,34 @@ public abstract class Expr
     public class Fun : Expr
     {
         public Token Id {get; init;}
+        public List<Token> Params {get; init;}
         public Stmt.Block Body {get; init;}
 
-        public Fun(Token id, Stmt.Block body)
+        public Fun(Token id, List<Token> param, Stmt.Block body)
         {
             Id = id;
+            Params = param;
             Body = body;
         }
 
         public override Expr Eval(Interpreter.Context ctx)
         {
             return this;
+        }
+
+        public Expr? Run(Interpreter.Context ctx, FuncCall call)
+        {
+            ctx.StartBlockScope();
+            for (int i = 0; i < Params.Count; i++)
+            {
+                ctx.DeclareVar(Params[i], call.Args[i]);
+            }
+            foreach (var stmt in this.Body.Stmts)
+            {
+                stmt.Run(ctx);
+            }
+            ctx.EndBlockScope();
+            return null;
         }
 
         public override string? ToOutput()
