@@ -1,7 +1,14 @@
-// Declare outer variable 'a' in global scope
-var a = "outer";
+var a = "1";
+print a;
+
+var a;
+print a;
+
+var a = "2";
+print a;
 
 {
-  // Attempting to declare local variable'a' initialized with itself
-  var a = a; // This should be a compile error
+  var a = "1";
+  var a = "2";
+  print a;
 }

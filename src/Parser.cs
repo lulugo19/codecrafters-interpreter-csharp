@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.Intrinsics.X86;
 using AST;
 
 public class Parser
@@ -9,10 +10,18 @@ public class Parser
         public ParserException(string msg) : base(msg) {}
     }
 
+    public class CompileTimeException : Exception
+    {
+        public CompileTimeException(string msg) : base(msg) {}
+    }
+
     private readonly string _source;
     private readonly List<Token> _tokens;
     private int _current = 0;
     private int _currentScopeLevel = 0;
+    private Stack<Dictionary<string, Token>> _declaredVariables =
+         new Stack<Dictionary<string, Token>>();
+
     private Token? _insideVarDeclaration = null;
 
     public bool HasErrors {get; private set;} = false;
@@ -26,6 +35,8 @@ public class Parser
     {
         _current = 0;
         _currentScopeLevel = 0;
+        _declaredVariables.Clear();
+        _declaredVariables.Push(new Dictionary<string, Token>());
         HasErrors = false;
         var stmts = new List<Stmt>();
         try 
@@ -98,6 +109,15 @@ public class Parser
     {
         var id = _Expect(TokenType.IDENTIFIER);
         _insideVarDeclaration = id;
+        if (_declaredVariables.Peek().ContainsKey(id.Lexeme))
+        {
+            Console.Error.WriteLine($"[line {id.Line}] Error at '{id.Lexeme}': Already an identifier with this name in this scope.");
+            HasErrors = true;
+        }
+        else
+        {
+            _declaredVariables.Peek().Add(id.Lexeme, id);
+        }
         Stmt.VarDecl? decl = null;
         if (_Match(TokenType.EQUAL))
         {
@@ -115,11 +135,27 @@ public class Parser
     private Stmt.FunDecl _StmtFunDecl()
     {
         var id = _Expect(TokenType.IDENTIFIER);
+        if (_declaredVariables.Peek().ContainsKey(id.Lexeme))
+        {
+            Console.Error.WriteLine($"[line {id.Line}] Error at '{id.Lexeme}': Already an identifier with this name in this scope.");
+            HasErrors = true;
+        }
         _Expect(TokenType.LEFT_PAREN);
+        _declaredVariables.Push(new Dictionary<string, Token>());
         var param = new List<Token>();
         while (!_Match(TokenType.RIGHT_PAREN))
         {
-            param.Add(_Expect(TokenType.IDENTIFIER));
+            var pId = _Expect(TokenType.IDENTIFIER);
+            param.Add(pId);
+            if (_declaredVariables.Peek().ContainsKey(pId.Lexeme))
+            {
+                Console.Error.WriteLine($"[line {pId.Line}] Error at '{pId.Lexeme}': Already an identifier with this name in this scope.");
+                HasErrors = true;
+            }
+            else 
+            {
+                _declaredVariables.Peek().Add(pId.Lexeme, pId);
+            }         
             if (_Peek().Type != TokenType.COMMA)
             {
                 _Expect(TokenType.RIGHT_PAREN);
@@ -128,8 +164,8 @@ public class Parser
             _Expect(TokenType.COMMA);
         }
         _Expect(TokenType.LEFT_BRACE);
-        var body = _StmtBlock();
-
+        var body = _StmtBlock(false);
+        _declaredVariables.Pop();
         return new Stmt.FunDecl(id, param, body);
     }
 
@@ -179,12 +215,16 @@ public class Parser
         return new Stmt.Expr(_Expr());
     }
 
-    private Stmt.Block _StmtBlock()
+    private Stmt.Block _StmtBlock(bool createNewVarScope = true)
     {
         _currentScopeLevel++;
+        if (createNewVarScope)
+            _declaredVariables.Push(new Dictionary<string, Token>());
         var stmts = _Stmts();
         _Expect(TokenType.RIGHT_BRACE);
         _currentScopeLevel--;
+        if (createNewVarScope)
+            _declaredVariables.Pop();
         return new Stmt.Block(stmts);
     }
 
@@ -478,7 +518,8 @@ public class Parser
             {
                 if (id.Lexeme == _insideVarDeclaration.Lexeme)
                 {
-                    throw new ParserException($"[line {id.Line}] Error at '{id.Lexeme}': Attempting to declare local variable '{id.Lexeme}' initialized with itself");
+                    Console.Error.WriteLine($"[line {id.Line}] Error at '{id.Lexeme}': Attempting to declare local variable '{id.Lexeme}' initialized with itself");
+                    HasErrors = true;
                 }
             }
             return new Expr.Var(id);         
