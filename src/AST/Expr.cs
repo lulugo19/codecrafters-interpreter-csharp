@@ -405,5 +405,28 @@ public abstract class Expr
                 return $"(/ {Left} {Right})";
             }
         }
+
+        public class Or : Binary
+        {
+            public Or(Expr left, Expr right) : base(left, right) {}
+
+            public override Expr Eval(Interpreter.Context ctx)
+            {
+                var leftVal = Left.Eval(ctx);
+                var rightVal = Right.Eval(ctx);
+
+                var falsyLeft = leftVal is Literal litLeft && (litLeft.Value is AST.Literal.Boolean b1 && !b1.Value || litLeft.Value is AST.Literal.Nil);
+                if (!falsyLeft)
+                {
+                    return leftVal;
+                }
+                var falsyRight = rightVal is Literal litRight && (litRight.Value is AST.Literal.Boolean b2 && !b2.Value || litRight.Value is AST.Literal.Nil);
+                if (!falsyRight)
+                {
+                    return rightVal;
+                }
+                return new Expr.Literal(new AST.Literal.Boolean(false));
+            }
+        }
     }
 }

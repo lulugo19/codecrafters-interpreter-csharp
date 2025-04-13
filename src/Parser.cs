@@ -183,8 +183,28 @@ public class Parser
         }
         else
         {
-            return _ExprEqu();
+            return _ExprOr();
         }      
+    }
+
+    private Expr _ExprOr()
+    {
+        var expr = _ExprEqu();
+        while (_Match(TokenType.OR))
+        {
+            expr = new Expr.Binary.Or(expr, _ExprEqu());
+        }
+        return expr;
+    }
+
+    private Expr _ExprAnd()
+    {
+        var expr = _ExprEqu();
+        while (_Match(TokenType.AND))
+        {
+            expr = new Expr.Binary.Or(expr, _ExprEqu());
+        }
+        return expr;
     }
 
     private Expr _ExprEqu()
