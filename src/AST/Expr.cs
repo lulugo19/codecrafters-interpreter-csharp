@@ -499,12 +499,11 @@ public abstract class Expr
 
         public Interpreter.Context BoundedContext {get; set;} = new Interpreter.Context();
 
-        public Fun(Token id, List<Token> param, Stmt.Block body, Interpreter.Context bContext)
+        public Fun(Token id, List<Token> param, Stmt.Block body)
         {
             Id = id;
             Params = param;
             Body = body;
-            BoundedContext = bContext;
         }
 
         public override Expr Eval(Interpreter.Context ctx)
@@ -545,8 +544,7 @@ public abstract class Expr
             public Clock() : base(
                     new Token(TokenType.IDENTIFIER, "clock", null, 0), 
                     new List<Token>(),
-                    null,
-                    new Interpreter.Context()
+                    null
                 ) {}
 
             public override Expr? Run(Interpreter.Context ctx, FuncCall call)
