@@ -128,14 +128,17 @@ public class Parser
     private Stmt.VarDecl _StmtVarDecl()
     {
         var id = _Expect(TokenType.IDENTIFIER);
+        Stmt.VarDecl? decl = null;
         if (_Match(TokenType.EQUAL))
         {
-            return new Stmt.VarDecl(id, _Expr());
+            decl = new Stmt.VarDecl(id, _Expr());
         }
         else
         {
-            return new Stmt.VarDecl(id, null);
-        }               
+            decl = new Stmt.VarDecl(id, null);
+        }
+        _Expect(TokenType.SEMICOLON);
+        return decl;         
     }
 
     private Stmt.Block _StmtBlock()
