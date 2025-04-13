@@ -45,9 +45,13 @@ public class Interpreter
 
         public Scope CurrentScope => Scopes.Peek();
 
+        public Scope GlobalScope {get; init;} = new Scope();
+
+        private Token? _varDeclIdentifier;
+
         public Context()
         {
-            Scopes.Push(new Scope());
+            Scopes.Push(GlobalScope);
             CurrentScope.Vars.Add("clock", new Variable(Expr.Fun.Clock.Instance));
         }
 
@@ -85,6 +89,10 @@ public class Interpreter
         public Expr GetVarVal(Token identifier)
         {
             string id = identifier.Lexeme;
+            if (id == _varDeclIdentifier?.Lexeme)
+            {
+                throw new Exception($"Attempting to declare local variable '{id}' initialized with itself.");
+            }
             foreach (var scope in Scopes)
             {
                 scope.Vars.TryGetValue(id, out Variable? val);
@@ -113,7 +121,12 @@ public class Interpreter
 
         public void DeclareVar(Token identifier, Expr val)
         {
+            if (CurrentScope != GlobalScope)
+            {
+                _varDeclIdentifier = identifier;
+            }
             CurrentScope.Vars[identifier.Lexeme] = new Variable(val.Eval(this));
+            _varDeclIdentifier = null;
         }
 
         public void OutputCurrentScope()

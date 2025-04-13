@@ -1,12 +1,7 @@
-// This program demonstrates global and local variable shadowing in Lox.
-var a = 50;
+// Declare outer variable 'a' in global scope
+var a = "outer";
 
-fun printAndModify() {
-  print a;
-  var a = 38;
-  print a;
+{
+  // Attempting to declare local variable'a' initialized with itself
+  var a = a; // This should be a compile error
 }
-
-print a;
-a = 43;
-printAndModify();

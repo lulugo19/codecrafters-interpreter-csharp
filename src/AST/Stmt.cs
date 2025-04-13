@@ -49,7 +49,7 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            ctx.DeclareVar(Id,  Value?.Eval(ctx) ?? new AST.Expr.Literal(Literal.Nil.Instance));
+            ctx.DeclareVar(Id,  Value ?? new AST.Expr.Literal(Literal.Nil.Instance));
             return null;
         }
     }
