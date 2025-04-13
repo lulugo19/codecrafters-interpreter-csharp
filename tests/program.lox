@@ -1,9 +1,31 @@
-// This program computes the 35th Fibonacci number
-fun fib(n) {
-  if (n < 2) return n;
-  return fib(n - 2) + fib(n - 1);
+// This program creates a function that returns another function
+// and uses it to filter a list of numbers
+fun makeFilter(min) {
+  fun filter(n) {
+    if (n < min) {
+      return false;
+    }
+    return true;
+  }
+  return filter;
 }
 
-var start = clock();
-print fib(10) == 55;
-print (clock() - start) < 5; // 5 seconds
+// This function applies a function to a list of numbers
+fun applyToNumbers(f, count) {
+  var n = 0;
+  while (n < count) {
+    if (f(n)) {
+      print n;
+    }
+    n = n + 1;
+  }
+}
+
+var greaterThanX = makeFilter(53);
+var greaterThanY = makeFilter(13);
+
+print "Numbers >= 53:";
+applyToNumbers(greaterThanX, 53 + 4);
+
+print "Numbers >= 13:";
+applyToNumbers(greaterThanY, 13 + 4);

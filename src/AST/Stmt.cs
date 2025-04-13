@@ -93,7 +93,6 @@ public abstract class Stmt
                 stmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
                 {
-                    ctx.Flags &= ~Interpreter.Flags.RETURN;
                     break;
                 }
             }
@@ -169,7 +168,6 @@ public abstract class Stmt
                 LoopStmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
                 {
-                    ctx.Flags &= ~Interpreter.Flags.RETURN;
                     break;
                 }
             }
@@ -200,7 +198,6 @@ public abstract class Stmt
                 LoopStmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
                 {
-                    ctx.Flags &= ~Interpreter.Flags.RETURN;
                     break;
                 }
                 Incr?.Run(ctx);
