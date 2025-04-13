@@ -18,6 +18,7 @@ public class Parser
     private readonly string _source;
     private readonly List<Token> _tokens;
     private int _current = 0;
+    private bool _isInFunctionScope = false;
     private Stack<Dictionary<string, Token>> _declaredVariables =
          new Stack<Dictionary<string, Token>>();
 
@@ -37,6 +38,7 @@ public class Parser
         _current = 0;
         _declaredVariables.Clear();
         _declaredVariables.Push(new Dictionary<string, Token>());
+        _isInFunctionScope = false;
         HasErrors = false;
         var stmts = new List<Stmt>();
         try 
@@ -164,7 +166,10 @@ public class Parser
             _Expect(TokenType.COMMA);
         }
         _Expect(TokenType.LEFT_BRACE);
+        var wasInFunctionScope = _isInFunctionScope;
+        _isInFunctionScope = true;
         var body = _StmtBlock(false);
+        _isInFunctionScope = wasInFunctionScope;
         _declaredVariables.Pop();
         return new Stmt.FunDecl(id, param, body);
     }
@@ -296,6 +301,12 @@ public class Parser
 
     private Stmt.Return _StmtReturn()
     {
+        if (!_isInFunctionScope)
+        {
+            var retToken = _Previous();
+            Console.Error.WriteLine($"[line {retToken.Line}] Error at 'return': Can't return from top-level code.");
+            HasErrors = true;
+        }
         Expr? retVal = null;
         if (_Peek().Type != TokenType.SEMICOLON)
         {

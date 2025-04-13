@@ -1,22 +1,13 @@
-// This program uses for loops and block scopes<|SPACE|>// to print the updates to the same variable
-var bar = "after";
-{
-  var bar = "before";
+fun foo() {
+  if (true) {
+    return "early return";
+  }
 
-  for (var bar = 0; bar < 1; bar = bar + 1) {
-    print bar;
-    var bar = -1;
-    print bar;
+  for (var i = 0; i < 10; i = i + 1) {
+    return "loop return";
   }
 }
 
-{
-  for (var bar = 0; bar > 0; bar = bar + 1) {}
-
-  var bar = "after";
-  print bar;
-
-  for (bar = 0; bar < 1; bar = bar + 1) {
-    print bar;
-  }
+if (true) {
+  return "conditional return";
 }
