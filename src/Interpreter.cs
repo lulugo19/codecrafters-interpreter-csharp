@@ -7,9 +7,19 @@ public class Interpreter
         public  Dictionary<string, Expr> Vars {get; init;} = new Dictionary<string, Expr>();
     }
 
+    [Flags]
+    public enum Flags 
+    {
+        RETURN = 1,
+    }
+
     public class Context
     {
         public Stack<Scope> Scopes {get; init;} = new Stack<Scope>();
+
+        public Flags Flags {get; set;}
+
+        public Expr? RetVal {get; set;}
 
         public Scope CurrentScope => Scopes.Peek();
 

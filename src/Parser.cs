@@ -122,33 +122,36 @@ public class Parser
 
     private Stmt _Stmt()
     {
-        Stmt? stmt = null;
         if (_Match(TokenType.PRINT))
         {
-            stmt = _StmtPrint();
+            return _StmtPrint();
         }
         else if (_Match(TokenType.LEFT_BRACE))
         {
-            stmt = _StmtBlock();
+            return _StmtBlock();
         }
         else if (_Match(TokenType.IF))
         {
-            stmt = _StmtIf();
+            return _StmtIf();
         }
         else if (_Match(TokenType.WHILE))
         {
-            stmt = _StmtWhile();
+            return _StmtWhile();
         }
         else if (_Match(TokenType.FOR))
         {
-            stmt = _StmtFor();
+            return _StmtFor();
+        }
+        else if (_Match(TokenType.RETURN))
+        {
+            return _StmtReturn(); 
         }
         else
         {
-            stmt = _StmtExpr();
+            var stmt = _StmtExpr();
             _Expect(TokenType.SEMICOLON);
+            return stmt;
         }
-        return stmt;
     }
 
     private Stmt.Print _StmtPrint()
@@ -234,6 +237,17 @@ public class Parser
         Stmt loopStmt = _Stmt();
 
         return new Stmt.For(init, cond, incr, loopStmt);
+    }
+
+    private Stmt.Return _StmtReturn()
+    {
+        Expr? retVal = null;
+        if (_Peek().Type != TokenType.SEMICOLON)
+        {
+            retVal = _Expr();
+        }
+        _Expect(TokenType.SEMICOLON);
+        return new Stmt.Return(retVal);
     }
 
     private ParserException _StmtError()

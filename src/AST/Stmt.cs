@@ -85,6 +85,11 @@ public abstract class Stmt
             foreach (var stmt in Stmts)
             {
                 stmt.Run(ctx);
+                if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
+                {
+                    ctx.Flags &= Interpreter.Flags.RETURN;
+                    return ctx.RetVal;
+                }
             }
             ctx.EndBlockScope();
             return null;
@@ -184,6 +189,23 @@ public abstract class Stmt
                 LoopStmt.Run(ctx);
                 Incr?.Run(ctx);
             }
+            return null;
+        }
+    }
+
+    public class Return : Stmt
+    {
+        public AST.Expr? RetVal {get; init;}
+
+        public Return(AST.Expr retVal)
+        {
+            RetVal = retVal;
+        }
+
+        public override AST.Expr? Run(Interpreter.Context ctx)
+        {
+            ctx.RetVal = RetVal?.Eval(ctx);
+            ctx.Flags |= Interpreter.Flags.RETURN;          
             return null;
         }
     }

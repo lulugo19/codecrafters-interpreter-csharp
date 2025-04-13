@@ -512,6 +512,7 @@ public abstract class Expr
 
         public Expr? Run(Interpreter.Context ctx, FuncCall call)
         {
+            ctx.RetVal = null;
             ctx.StartBlockScope();
             for (int i = 0; i < Params.Count; i++)
             {
@@ -520,9 +521,14 @@ public abstract class Expr
             foreach (var stmt in this.Body.Stmts)
             {
                 stmt.Run(ctx);
+                if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
+                {
+                    ctx.Flags &= ~Interpreter.Flags.RETURN;
+                    break;
+                }
             }
             ctx.EndBlockScope();
-            return null;
+            return ctx.RetVal;
         }
 
         public override string? ToOutput()
