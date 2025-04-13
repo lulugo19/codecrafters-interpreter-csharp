@@ -89,6 +89,10 @@ public class Parser
         {
             stmt = _StmtIf();
         }
+        else if (_Match(TokenType.WHILE))
+        {
+            stmt = _StmtWhile();
+        }
         else
         {
             stmt = _StmtExpr();
@@ -152,6 +156,15 @@ public class Parser
             elseStmt = _Stmt();
         }
         return new Stmt.If(cond, whenTrue, elseIfs, elseStmt);
+    }
+
+    private Stmt.While _StmtWhile()
+    {
+        _Expect(TokenType.LEFT_PAREN);
+        var cond = _Expr();
+        _Expect(TokenType.RIGHT_PAREN);
+        var loopStmt = _Stmt();
+        return new Stmt.While(cond, loopStmt);
     }
 
     private ParserException _StmtError()

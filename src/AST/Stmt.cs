@@ -139,4 +139,24 @@ public abstract class Stmt
             }
         }       
     }
+
+    public class While : Stmt
+    {
+        public AST.Expr Cond {get; init;}
+        public Stmt LoopStmt {get; init;}
+
+        public While(AST.Expr cond, Stmt loopStmt)
+        {
+            Cond = cond;
+            LoopStmt = loopStmt;
+        }
+
+        public override void Run(Interpreter.Context ctx)
+        {
+            while (Cond.Eval(ctx).ToBoolean())
+            {
+                LoopStmt.Run(ctx);
+            }
+        }
+    }
 }

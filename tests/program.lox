@@ -1,6 +1,12 @@
-print false and 1;
-print true and 1;
-print 23 and "hello" and false;
+var n = 10;
+var fm = 0;
+var fn = 1;
+var index = 0;
 
-print 23 and true;
-print 23 and "hello" and 23;
+while (index < n) {
+  print fm;
+  var temp = fm;
+  fm = fn;
+  fn = temp + fn;
+  index = index + 1;
+}
