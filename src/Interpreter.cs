@@ -2,16 +2,26 @@ using AST;
 
 public class Interpreter
 {
+    public class Variable
+    {
+        public Expr Value {get; set;}
+
+        public Variable(Expr val)
+        {
+            Value = val;
+        }
+    }
+
     public class Scope
     {
         public Scope() {}
 
-        public Scope(Dictionary<string, Expr> vars)
+        public Scope(Dictionary<string, Variable> vars)
         {
             Vars = vars;
         }
 
-        public  Dictionary<string, Expr> Vars {get; init;} = new Dictionary<string, Expr>();
+        public  Dictionary<string, Variable> Vars {get; init;} = new Dictionary<string, Variable>();
         
         public Scope Copy()
         {
@@ -38,17 +48,17 @@ public class Interpreter
         public Context()
         {
             Scopes.Push(new Scope());
-            CurrentScope.Vars.Add("clock", Expr.Fun.Clock.Instance);
+            CurrentScope.Vars.Add("clock", new Variable(Expr.Fun.Clock.Instance));
         }
 
-        public Context(Dictionary<string, Expr> vars)
+        public Context(Dictionary<string, Variable> vars)
         {
             Scopes.Push(new Scope(vars));
         }
 
         public Context Copy()
         {
-            Dictionary<string, Expr> vars = new Dictionary<string, Expr>();
+            Dictionary<string, Variable> vars = new Dictionary<string, Variable>();
             foreach (var scope in Scopes)
             {
                 foreach (var key in scope.Vars.Keys)
@@ -77,10 +87,10 @@ public class Interpreter
             string id = identifier.Lexeme;
             foreach (var scope in Scopes)
             {
-                scope.Vars.TryGetValue(id, out Expr? val);
+                scope.Vars.TryGetValue(id, out Variable? val);
                 if (val != null)
                 {
-                    return val;
+                    return val.Value;
                 }
             }
             throw new Exception($"Undefined variable '{id}'");
@@ -94,7 +104,7 @@ public class Interpreter
                 if (scope.Vars.ContainsKey(id))
                 {
                     var evalued = val.Eval(this);
-                    scope.Vars[id] = evalued;
+                    scope.Vars[id].Value = evalued;
                     return evalued;
                 }
             }
@@ -103,7 +113,7 @@ public class Interpreter
 
         public void DeclareVar(Token identifier, Expr val)
         {
-            CurrentScope.Vars[identifier.Lexeme] = val.Eval(this);
+            CurrentScope.Vars[identifier.Lexeme] = new Variable(val.Eval(this));
         }
 
         public void OutputCurrentScope()
