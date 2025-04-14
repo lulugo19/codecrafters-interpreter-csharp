@@ -581,7 +581,13 @@ public abstract class Expr
         public override Expr? Run(Interpreter.Context ctx, FuncCall call)
         {
             BoundedContext.DeclareVar(new Token(TokenType.THIS, "this", null, 0), Inst);
-            return base.Run(ctx, call);
+            
+            base.Run(ctx, call);
+            if (Id.Lexeme == "init")
+            {
+                return Inst;
+            }
+            return BoundedContext.RetVal;
         }
     }
 
@@ -705,8 +711,6 @@ public abstract class Expr
                 // call constructor when unintialised
                 if (!_initialising && !_initialised)
                 {
-                    // constructor always implicitly returns object
-                    var retStmt = new Stmt.Return(new Expr.Var(new Token(TokenType.IDENTIFIER, "this", null, 0)));
                     Method? constr = null;
                     try 
                     {
@@ -716,17 +720,13 @@ public abstract class Expr
                     {
                         // default constructor
                         var token = new Token(TokenType.IDENTIFIER, "init", null, 0);
-                        var body = new Stmt.Block(new List<Stmt>() {retStmt});
+                        var body = new Stmt.Block(new List<Stmt>() {});
                         constr = new Method(token, new List<Token>(), body, this);
                     }
                     if (constr != null)
                     {
                         _initialising = true;
                         constr.Run(ctx, new FuncCall(new Literal(AST.Literal.Nil.Instance), Args));
-                        if (constr.Body.Stmts.Count == 0 || constr.Body.Stmts.Last() is not Stmt.Return)
-                        {
-                            constr.Body.Stmts.Add(retStmt);
-                        }
                         _initialising = false;
                         _initialised = true;    
                     }               

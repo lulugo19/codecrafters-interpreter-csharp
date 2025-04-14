@@ -18,7 +18,8 @@ public class Parser
     private readonly string _source;
     private readonly List<Token> _tokens;
     private int _current = 0;
-    private bool _isInFunctionScope = false;
+    private bool _insideFunction = false;
+    private bool _insideConstructor = false;
     private Stack<Dictionary<string, Token>> _declaredVariables =
          new Stack<Dictionary<string, Token>>();
 
@@ -39,7 +40,7 @@ public class Parser
         _current = 0;
         _declaredVariables.Clear();
         _declaredVariables.Push(new Dictionary<string, Token>());
-        _isInFunctionScope = false;
+        _insideFunction = false;
         HasErrors = false;
         var stmts = new List<Stmt>();
         try 
@@ -171,10 +172,14 @@ public class Parser
             _Expect(TokenType.COMMA);
         }
         _Expect(TokenType.LEFT_BRACE);
-        var wasInFunctionScope = _isInFunctionScope;
-        _isInFunctionScope = true;
+        var wasInFunctionScope = _insideFunction;
+        _insideFunction = true;
+        if (_insideClassDeclaration && id.Lexeme == "init") {
+            _insideConstructor = true;
+        }
         var body = _StmtBlock(false);
-        _isInFunctionScope = wasInFunctionScope;
+        _insideConstructor = false;
+        _insideFunction = wasInFunctionScope;
         _declaredVariables.Pop();
         return new Stmt.FunDecl(id, param, body);
     }
@@ -327,9 +332,9 @@ public class Parser
 
     private Stmt.Return _StmtReturn()
     {
-        if (!_isInFunctionScope)
+        var retToken = _Previous();
+        if (!_insideFunction)
         {
-            var retToken = _Previous();
             Console.Error.WriteLine($"[line {retToken.Line}] Error at 'return': Can't return from top-level code.");
             HasErrors = true;
         }
@@ -337,6 +342,11 @@ public class Parser
         if (_Peek().Type != TokenType.SEMICOLON)
         {
             retVal = _Expr();
+            if (_insideConstructor)
+            {
+                Console.Error.WriteLine($"[line {retToken.Line}] Error at 'return': Can't return a value from an initializer.");
+                HasErrors = true;
+            }
         }
         _Expect(TokenType.SEMICOLON);
         return new Stmt.Return(retVal);

@@ -254,7 +254,7 @@ public abstract class Stmt
     {
         public AST.Expr? RetVal {get; init;}
 
-        public Return(AST.Expr retVal)
+        public Return(AST.Expr? retVal)
         {
             RetVal = retVal;
         }
