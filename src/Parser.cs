@@ -580,10 +580,17 @@ public class Parser
                 Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': Can't use '{token.Lexeme}' outside of a class.");
                 HasErrors = true;
             }
-            if (token.Type == TokenType.SUPER && !_hasSuperClass)
+            if (token.Type == TokenType.SUPER)
             {
-                Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': Can't use super. It's not a subclass.");
-                HasErrors = true;
+                if (!_hasSuperClass)
+                {
+                    Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': Can't use super. It's not a subclass.");
+                    HasErrors = true;
+                }
+                if (_Peek().Type != TokenType.DOT)
+                {
+                    Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': super must be followed by '.'.");
+                }
             }
             return new Expr.Var(token);
         }
