@@ -191,6 +191,11 @@ public class Parser
         if (_Match(TokenType.LESS))
         {
             superClass = _Expect(TokenType.IDENTIFIER);
+            if (superClass.Lexeme == id.Lexeme)
+            {
+                Console.Error.WriteLine($"[line {superClass.Line}] Error at '{superClass.Lexeme}': A class can't inherit from itself.");
+                HasErrors = true;
+            }
         }
         _Expect(TokenType.LEFT_BRACE);
         _insideClassDeclaration = true;
