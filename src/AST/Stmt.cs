@@ -96,13 +96,15 @@ public abstract class Stmt
     public class ClassDecl : Stmt
     {
         public Token Id {get; init;}
+        public Token? SuperClass {get; init;}
         
         public List<MethodDecl> Methods {get; init;}
 
-        public ClassDecl(Token id, List<MethodDecl> methods)
+        public ClassDecl(Token id, Token? superClass, List<MethodDecl> methods)
         {
             Id = id;
             Methods = methods;
+            SuperClass = superClass;
         }
 
         public override AST.Expr? Run(Interpreter.Context ctx)

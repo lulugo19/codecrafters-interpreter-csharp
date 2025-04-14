@@ -187,6 +187,11 @@ public class Parser
     private Stmt.ClassDecl _StmtClassDecl()
     {
         var id = _Expect(TokenType.IDENTIFIER);
+        Token? superClass = null;
+        if (_Match(TokenType.LESS))
+        {
+            superClass = _Expect(TokenType.IDENTIFIER);
+        }
         _Expect(TokenType.LEFT_BRACE);
         _insideClassDeclaration = true;
         var methods = new List<Stmt.MethodDecl>();
@@ -196,7 +201,7 @@ public class Parser
         }
         _insideClassDeclaration = false;
         _Expect(TokenType.RIGHT_BRACE);
-        return new Stmt.ClassDecl(id, methods);
+        return new Stmt.ClassDecl(id, superClass, methods);
     }
 
     private Stmt _Stmt()
