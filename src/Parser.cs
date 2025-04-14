@@ -545,15 +545,21 @@ public class Parser
                     HasErrors = true;
                 }
             }
-            return new Expr.Var(id);         
+            if (id.Lexeme[0] == id.Lexeme[0].ToString().ToUpper()[0] && _Peek().Type == TokenType.LEFT_PAREN)
+            {
+                _Expect(TokenType.LEFT_PAREN);
+                _Expect(TokenType.RIGHT_PAREN);
+                return new Expr.ClassInst(id);
+            }
+            return new Expr.Var(id);
         }
-        if (_Match(TokenType.LEFT_PAREN)) 
+        if (_Match(TokenType.LEFT_PAREN))
         {
             var expr = _Expr();
             _Expect(TokenType.RIGHT_PAREN);
             return new Expr.Group(expr);
         }
-        throw _ExprError();    
+        throw _ExprError();
     }
 
     private ParserException _ExprError()

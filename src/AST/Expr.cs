@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.Formats.Asn1;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata.Ecma335;
 
 namespace AST;
 public abstract class Expr
@@ -561,7 +562,7 @@ public abstract class Expr
 
     public class Class : Expr
     {
-        Token Id {get; init;}
+        public Token Id {get; init;}
 
         public Class(Token id)
         {
@@ -579,5 +580,33 @@ public abstract class Expr
         }
     }
 
-    
+    public class ClassInst : Expr
+    {
+        public Token ClassId {get; init;}
+
+        public Class Class {get; private set;}
+
+        public ClassInst(Token classId)
+        {
+            ClassId = classId;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            try
+            {
+                Class = (Class)ctx.GetVarVal(ClassId);
+            }
+            catch (Exception)
+            {
+                throw new Exception($"The class '{ClassId.Lexeme}' is not defined");
+            }
+            return this;
+        }
+
+        public override string? ToOutput()
+        {
+            return $"{Class.Id.Lexeme} instance";
+        }
+    }
 }
