@@ -500,39 +500,30 @@ public class Parser
         }
         else
         {
-            return _ExprCall();
+            return _ExprCallOrProp();
         }
     }
 
-    private Expr _ExprCall()
-    {
-        var expr = _ExprClassProp();
-        while (_Match(TokenType.LEFT_PAREN))
-        {
-            List<Expr> args = new List<Expr>();
-            while (!_Match(TokenType.RIGHT_PAREN))
-            {
-                args.Add(_Expr());
-                if (_Peek().Type != TokenType.COMMA)
-                {
-                    _Expect(TokenType.RIGHT_PAREN);
-                    break;
-                }
-                _Expect(TokenType.COMMA);
-            }
-            expr = new Expr.FuncCall(expr, args);
-        }
-        return expr;
-    }
-
-    private Expr _ExprClassProp()
+    private Expr _ExprCallOrProp()
     {
         var expr = _ExprPrimary();
-        while (_Match(TokenType.DOT))
+        while (true)
         {
-            var propId = _Expect(TokenType.IDENTIFIER);
-            expr = new Expr.Getter(expr, propId);
-        }      
+            if (_Match(TokenType.LEFT_PAREN))
+            {
+                var args = _ExprArgs();
+                expr = new Expr.FuncCall(expr, args);
+            }
+            else if (_Match(TokenType.DOT))
+            {
+                var propId = _Expect(TokenType.IDENTIFIER);
+                expr = new Expr.Getter(expr, propId);
+            }
+            else
+            {
+                break;
+            }          
+        }
         return expr;
     }
 
@@ -583,8 +574,8 @@ public class Parser
             if (id.Lexeme[0] == id.Lexeme[0].ToString().ToUpper()[0] && _Peek().Type == TokenType.LEFT_PAREN)
             {
                 _Expect(TokenType.LEFT_PAREN);
-                _Expect(TokenType.RIGHT_PAREN);
-                return new Expr.ClassInst(id);
+                var args = _ExprArgs();
+                return new Expr.ClassInst(id, args);
             }
             return new Expr.Var(id);
         }
@@ -595,6 +586,23 @@ public class Parser
             return new Expr.Group(expr);
         }
         throw _ExprError();
+    }
+
+    private List<Expr> _ExprArgs()
+    {
+        List<Expr> args = new List<Expr>();
+        while (!_Match(TokenType.RIGHT_PAREN))
+        {
+            args.Add(_Expr());
+            if (_Peek().Type != TokenType.COMMA)
+            {
+                _Expect(TokenType.RIGHT_PAREN);
+                break;
+            }
+            _Expect(TokenType.COMMA);
+        }
+
+        return args;
     }
 
     private ParserException _ExprError()

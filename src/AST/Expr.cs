@@ -485,18 +485,6 @@ public abstract class Expr
             var funVal = Fun.Eval(ctx);
             if (funVal is Function fun)
             {
-                /*
-                if (funVal is Method method)
-                {
-                    try 
-                    {
-                        method.Inst = (ClassInst)((Getter)(Fun)).ClassInstExpr.Eval(ctx);
-                    }
-                    catch
-                    {
-                        throw new Exception($"is not a class instance.");
-                    }                   
-                }*/
                 return fun.Run(ctx, this) ?? new Literal(AST.Literal.Nil.Instance);
             }
             else
@@ -579,6 +567,11 @@ public abstract class Expr
         public ClassInst Inst {get; init;}
         public Method(Token id, List<Token> param, Stmt.Block body) : base(id, param, body) { }
 
+        public Method(Token id, List<Token> param, Stmt.Block body, ClassInst inst) : this(id, param, body) 
+        { 
+            Inst = inst;
+        }
+
         public Method(Method method, ClassInst inst) : base(method.Id, method.Params, method.Body)
         {
             Inst = inst;
@@ -647,15 +640,21 @@ public abstract class Expr
         }
 
         public Token ClassId { get; init; }
+        public List<Expr> Args {get; init;}
 
         public Class Class {get; private set;}
 
         public Dictionary<string, Prop> Props {get; } = new Dictionary<string, Prop>();
 
-        public ClassInst(Token classId)
+        public ClassInst(Token classId, List<Expr> args)
         {
             ClassId = classId;
+            Args = args;
         }
+
+
+        private bool _initialising = false;
+        private bool _initialised = false;
 
         public Prop Get(Token propId, bool createNewProp = false)
         {
@@ -699,7 +698,41 @@ public abstract class Expr
         {
             try
             {
-                Class = (Class)ctx.GetVarVal(ClassId);
+                if (Class == null)
+                {
+                    Class = (Class)ctx.GetVarVal(ClassId);
+                }
+                // call constructor when unintialised
+                if (!_initialising && !_initialised)
+                {
+                    // constructor always implicitly returns object
+                    var retStmt = new Stmt.Return(new Expr.Var(new Token(TokenType.IDENTIFIER, "this", null, 0)));
+                    Method? constr = null;
+                    try 
+                    {
+                        constr = (Method)Get(new Token(TokenType.IDENTIFIER ,"init", null, 0)).Eval(ctx);
+                    }
+                    catch
+                    {
+                        // default constructor
+                        var token = new Token(TokenType.IDENTIFIER, "init", null, 0);
+                        var body = new Stmt.Block(new List<Stmt>() {retStmt});
+                        constr = new Method(token, new List<Token>(), body, this);
+                    }
+                    if (constr != null)
+                    {
+                        _initialising = true;
+                        constr.Run(ctx, new FuncCall(new Literal(AST.Literal.Nil.Instance), Args));
+                        if (constr.Body.Stmts.Count == 0 || constr.Body.Stmts.Last() is not Stmt.Return)
+                        {
+                            constr.Body.Stmts.Add(retStmt);
+                        }
+                        _initialising = false;
+                        _initialised = true;    
+                    }               
+                    
+                
+                }             
             }
             catch (Exception)
             {
