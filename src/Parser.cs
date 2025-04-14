@@ -555,6 +555,10 @@ public class Parser
         {
             return new Expr.Literal(new Literal.String(_Previous().Literal as string));
         }
+        if (_Match(TokenType.THIS))
+        {
+            return new Expr.Var(_Previous());
+        }
         if (_Match(TokenType.IDENTIFIER))
         {
             // parse function call

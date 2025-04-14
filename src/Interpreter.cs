@@ -52,7 +52,7 @@ public class Interpreter
         public Context()
         {
             Scopes.Push(GlobalScope);
-            CurrentScope.Vars.Add("clock", new Variable(Expr.Fun.Clock.Instance));
+            CurrentScope.Vars.Add("clock", new Variable(Expr.Function.Clock.Instance));
         }
 
         public Context(Dictionary<string, Variable> vars)

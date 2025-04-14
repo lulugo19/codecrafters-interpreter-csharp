@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Formats.Asn1;
 using System.Net.Http.Headers;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 
 namespace AST;
 public abstract class Expr
@@ -482,8 +483,20 @@ public abstract class Expr
         public override Expr Eval(Interpreter.Context ctx)
         {
             var funVal = Fun.Eval(ctx);
-            if (funVal is Expr.Fun fun)
+            if (funVal is Function fun)
             {
+                /*
+                if (funVal is Method method)
+                {
+                    try 
+                    {
+                        method.Inst = (ClassInst)((Getter)(Fun)).ClassInstExpr.Eval(ctx);
+                    }
+                    catch
+                    {
+                        throw new Exception($"is not a class instance.");
+                    }                   
+                }*/
                 return fun.Run(ctx, this) ?? new Literal(AST.Literal.Nil.Instance);
             }
             else
@@ -493,7 +506,7 @@ public abstract class Expr
         }
     }
 
-    public class Fun : Expr
+    public class Function : Expr
     {
         public Token Id {get; init;}
         public List<Token> Params {get; init;}
@@ -501,7 +514,7 @@ public abstract class Expr
 
         public Interpreter.Context BoundedContext {get; set;} = new Interpreter.Context();
 
-        public Fun(Token id, List<Token> param, Stmt.Block body)
+        public Function(Token id, List<Token> param, Stmt.Block body)
         {
             Id = id;
             Params = param;
@@ -543,7 +556,7 @@ public abstract class Expr
             return $"<fn {Id.Lexeme}>";
         }
 
-        public class Clock : Fun
+        public class Clock : Function
         {
             public static Clock Instance {get; } = new Clock();
 
@@ -561,10 +574,28 @@ public abstract class Expr
         }
     }
 
+    public class Method : Function
+    {
+        public ClassInst Inst {get; init;}
+        public Method(Token id, List<Token> param, Stmt.Block body) : base(id, param, body) { }
+
+        public Method(Method method, ClassInst inst) : base(method.Id, method.Params, method.Body)
+        {
+            Inst = inst;
+            BoundedContext = method.BoundedContext;
+        }
+
+        public override Expr? Run(Interpreter.Context ctx, FuncCall call)
+        {
+            BoundedContext.DeclareVar(new Token(TokenType.THIS, "this", null, 0), Inst);
+            return base.Run(ctx, call);
+        }
+    }
+
     public class Class : Expr
     {
         public Token Id {get; init;}
-        public Dictionary<string, Fun> Methods {get; } = new Dictionary<string, Fun>();
+        public Dictionary<string, Method> Methods {get; } = new Dictionary<string, Method>();
 
         public Class(Token id)
         {
@@ -576,7 +607,7 @@ public abstract class Expr
             return this;
         }
 
-        public void AddMethod(Fun method)
+        public void AddMethod(Method method)
         {
             string id = method.Id.Lexeme;
             if (!Methods.TryAdd(id, method))
@@ -638,9 +669,9 @@ public abstract class Expr
                    Props[id] = prop;
                    return prop;
                 }
-                else if (Class.Methods.TryGetValue(id, out Expr.Fun? method))
+                else if (Class.Methods.TryGetValue(id, out Expr.Method? method))
                 {
-                    return new Prop(propId, method);
+                    return new Prop(propId, new Method(method, this));
                 }
                 else
                 {
@@ -730,6 +761,14 @@ public abstract class Expr
             var prop = PropAccessor.Access(ctx, true);
             prop.Value = eval;
             return prop.Eval(ctx);
+        }
+    }
+
+    public class This : Expr
+    {
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            throw new NotImplementedException();
         }
     }
 }
