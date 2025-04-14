@@ -25,6 +25,7 @@ public class Parser
     private int _CurrentScopeLevel => _declaredVariables.Count - 1;
 
     private Token? _insideVarDeclaration = null;
+    private bool _insideClassDeclaration = false;
 
     public bool HasErrors {get; private set;} = false;
 
@@ -182,11 +183,13 @@ public class Parser
     {
         var id = _Expect(TokenType.IDENTIFIER);
         _Expect(TokenType.LEFT_BRACE);
+        _insideClassDeclaration = true;
         var methods = new List<Stmt.MethodDecl>();
         while (_Peek().Type == TokenType.IDENTIFIER)
         {
             methods.Add(new Stmt.MethodDecl(_StmtFunDecl()));
         }
+        _insideClassDeclaration = false;
         _Expect(TokenType.RIGHT_BRACE);
         return new Stmt.ClassDecl(id, methods);
     }
@@ -557,7 +560,13 @@ public class Parser
         }
         if (_Match(TokenType.THIS))
         {
-            return new Expr.Var(_Previous());
+            var thisToken = _Previous();
+            if (!_insideClassDeclaration)
+            {
+                Console.Error.WriteLine($"[line {thisToken.Line}] Error at 'this': Can't use 'this' outside of a class.");
+                HasErrors = true;
+            }
+            return new Expr.Var(thisToken);
         }
         if (_Match(TokenType.IDENTIFIER))
         {

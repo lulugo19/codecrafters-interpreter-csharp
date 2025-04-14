@@ -732,12 +732,11 @@ public abstract class Expr
 
         public ClassInst.Prop Access(Interpreter.Context ctx, bool createNewProp)
         {
-            try
-            {
-                var classInst = (ClassInst)ClassInstExpr.Eval(ctx);              
+            if (ClassInstExpr.Eval(ctx) is ClassInst classInst)
+            {        
                 return classInst.Get(PropId, createNewProp);
             }
-            catch
+            else
             {
                 throw new Exception($"[line {PropId.Line}] Expression is not a class instance.");
             }
