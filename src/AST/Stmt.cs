@@ -69,9 +69,9 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            var fun = new AST.Expr.Fun(Id, Params, Body);          
-            fun.BoundedContext = ctx.Copy();
+            var fun = new AST.Expr.Fun(Id, Params, Body);                   
             ctx.DeclareVar(Id, fun);
+            fun.BoundedContext = ctx.Copy();
             return null;
         }
     }
@@ -86,9 +86,9 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            var method = new AST.Expr.Fun(Id, Params, Body);
-            method.BoundedContext = ctx.Copy();
+            var method = new AST.Expr.Fun(Id, Params, Body);       
             Class.AddMethod(method);
+            method.BoundedContext = ctx.Copy();
             return null;
         }
     }
