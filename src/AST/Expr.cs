@@ -568,15 +568,22 @@ public abstract class Expr
 
     public class Method : Function
     {
-        public ClassInst Inst {get; init;}
-        public Method(Token id, List<Token> param, Stmt.Block body) : base(id, param, body) { }
 
-        public Method(Token id, List<Token> param, Stmt.Block body, ClassInst inst) : this(id, param, body) 
+        public Class Class {get; init;}
+        // class istance bound to the method
+        public ClassInst Inst {get; init;}
+
+        public Method(Token id, List<Token> param, Stmt.Block body, Class cls) : base(id, param, body) 
+        { 
+            Class = cls;
+        }
+
+        public Method(Token id, List<Token> param, Stmt.Block body, Class cls, ClassInst inst) : this(id, param, body, cls) 
         { 
             Inst = inst;
         }
 
-        public Method(Method method, ClassInst inst) : base(method.Id, method.Params, method.Body)
+        public Method(Method method, ClassInst inst) : this(method.Id, method.Params, method.Body, method.Class)
         {
             Inst = inst;
             BoundedContext = method.BoundedContext;
@@ -585,6 +592,7 @@ public abstract class Expr
         public override Expr? Run(Interpreter.Context ctx, FuncCall call)
         {
             BoundedContext.DeclareVar(new Token(TokenType.THIS, "this", null, 0), Inst);
+            BoundedContext.DeclareVar(new Token(TokenType.SUPER, "super", null, 0), new Super(Class.SuperClass, Inst));
             
             base.Run(ctx, call);
             if (Id.Lexeme == "init")
@@ -737,7 +745,7 @@ public abstract class Expr
                         // default constructor
                         var token = new Token(TokenType.IDENTIFIER, "init", null, 0);
                         var body = new Stmt.Block(new List<Stmt>() {});
-                        constr = new Method(token, new List<Token>(), body, this);
+                        constr = new Method(token, new List<Token>(), body, Class, this);
                     }
                     if (constr != null)
                     {
@@ -781,9 +789,29 @@ public abstract class Expr
 
         public ClassInst.Prop Access(Interpreter.Context ctx, bool createNewProp)
         {
-            if (ClassInstExpr.Eval(ctx) is ClassInst classInst)
+            var eval = ClassInstExpr.Eval(ctx);
+            if (eval is ClassInst classInst)
             {        
                 return classInst.Get(PropId, createNewProp);
+            }
+            else if (eval is Super sup)
+            {
+                if (sup.SuperClass != null)
+                {
+                    if (sup.SuperClass.TryGetMethod(PropId, out Method? method))
+                    {
+                        var bindMethod = new Method(method!, sup.Inst);
+                        return new ClassInst.Prop(PropId, bindMethod);
+                    }
+                    else
+                    {
+                        throw new Exception($"[line {PropId.Line}] Error at '{PropId.Lexeme}': Can't find method on super class '{sup.SuperClass.Id.Lexeme}''");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"[line {PropId.Line}] Error at '{PropId.Lexeme}': This class has no super class.");
+                }              
             }
             else
             {
@@ -812,11 +840,20 @@ public abstract class Expr
         }
     }
 
-    public class This : Expr
+    public class Super : Expr
     {
+        public Class? SuperClass {get; init;}
+        public ClassInst Inst {get; init;}
+
+        public Super(Class? superClass, ClassInst inst)
+        {
+            SuperClass = superClass;
+            Inst = inst;
+        }
+
         public override Expr Eval(Interpreter.Context ctx)
         {
-            throw new NotImplementedException();
+            return this;
         }
     }
 }

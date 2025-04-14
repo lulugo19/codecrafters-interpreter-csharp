@@ -1,23 +1,22 @@
-class baz {
-  inbaz() {
-    print "from baz";
+class Base {
+  method() {
+    print "Base.method()";
   }
 }
 
-class bar < baz {
-  inbar() {
-    print "from bar";
+class Parent < Base {
+  method() {
+    super.method();
   }
 }
 
-class quz < bar {
-  inquz() {
-    print "from quz";
+class Child < Parent {
+  method() {
+    super.method();
   }
 }
 
-// quz should inherit the methods
-// from both baz and bar
-var quz = quz();
-quz.inbaz();
-quz.inbar();
+var parent = Parent();
+parent.method();
+var child = Child();
+child.method();

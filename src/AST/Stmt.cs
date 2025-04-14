@@ -86,7 +86,7 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            var method = new AST.Expr.Method(Id, Params, Body);       
+            var method = new AST.Expr.Method(Id, Params, Body, Class);       
             Class.AddMethod(method);
             method.BoundedContext = ctx.Copy();
             return null;

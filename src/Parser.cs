@@ -569,15 +569,15 @@ public class Parser
         {
             return new Expr.Literal(new Literal.String(_Previous().Literal as string));
         }
-        if (_Match(TokenType.THIS))
+        if (_Match(TokenType.THIS) || _Match(TokenType.SUPER))
         {
-            var thisToken = _Previous();
+            var token = _Previous();
             if (!_insideClassDeclaration)
             {
-                Console.Error.WriteLine($"[line {thisToken.Line}] Error at 'this': Can't use 'this' outside of a class.");
+                Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': Can't use '{token.Lexeme}' outside of a class.");
                 HasErrors = true;
             }
-            return new Expr.Var(thisToken);
+            return new Expr.Var(token);
         }
         if (_Match(TokenType.IDENTIFIER))
         {
