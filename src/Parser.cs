@@ -590,6 +590,7 @@ public class Parser
                 if (_Peek().Type != TokenType.DOT)
                 {
                     Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': super must be followed by '.'.");
+                    HasErrors = true;
                 }
             }
             return new Expr.Var(token);
