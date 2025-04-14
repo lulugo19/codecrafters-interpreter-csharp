@@ -146,13 +146,13 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            if (Cond.Eval(ctx).IsTruthy())
+            if (Cond.IsTruthy(ctx))
             {
                 WhenTrue.Run(ctx);
             }
             else
             {
-                var trueElseIf = ElseIfs.FirstOrDefault(ei => ei.Cond.Eval(ctx).IsTruthy());
+                var trueElseIf = ElseIfs.FirstOrDefault(ei => ei.Cond.IsTruthy(ctx));
                 if (trueElseIf != null)
                 {
                     trueElseIf.WhenTrue.Run(ctx);
@@ -179,7 +179,7 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            while (Cond.Eval(ctx).IsTruthy())
+            while (Cond.IsTruthy(ctx))
             {
                 LoopStmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
@@ -210,7 +210,7 @@ public abstract class Stmt
         {
             ctx.StartBlockScope();
             Init?.Run(ctx);
-            while (Cond?.Eval(ctx)?.IsTruthy() ?? true)
+            while (Cond?.IsTruthy(ctx) ?? true)
             {
                 LoopStmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)

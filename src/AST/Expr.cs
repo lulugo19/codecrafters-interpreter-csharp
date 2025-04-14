@@ -15,9 +15,10 @@ public abstract class Expr
         return ToString();
     }
 
-    public bool IsTruthy()
+    public bool IsTruthy(Interpreter.Context ctx)
     {
-        var isFalsy = this is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
+        var val = Eval(ctx);
+        var isFalsy = val is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
         return !isFalsy;
     }
 
@@ -142,7 +143,7 @@ public abstract class Expr
 
             public override Expr Eval(Interpreter.Context ctx)
             {
-                return new Literal(new AST.Literal.Boolean(!Expr.Eval(ctx).IsTruthy()));
+                return new Literal(new AST.Literal.Boolean(!Expr.Eval(ctx).IsTruthy(ctx)));
             }
         }
     }
@@ -423,12 +424,12 @@ public abstract class Expr
             public override Expr Eval(Interpreter.Context ctx)
             {
                 var leftVal = Left.Eval(ctx);
-                if (leftVal.IsTruthy())
+                if (leftVal.IsTruthy(ctx))
                 {
                     return leftVal;
                 }
                 var rightVal = Right.Eval(ctx);
-                if (rightVal.IsTruthy())
+                if (rightVal.IsTruthy(ctx))
                 {
                     return rightVal;
                 }
@@ -448,12 +449,12 @@ public abstract class Expr
             public override Expr Eval(Interpreter.Context ctx)
             {
                 var leftVal = Left.Eval(ctx);
-                if (!leftVal.IsTruthy())
+                if (!leftVal.IsTruthy(ctx))
                 {
                     return new Literal(new AST.Literal.Boolean(false));
                 }
                 var rightVal = Right.Eval(ctx);
-                if (!rightVal.IsTruthy())
+                if (!rightVal.IsTruthy(ctx))
                 {
                     return new Literal(new AST.Literal.Boolean(false));
                 }
@@ -582,13 +583,71 @@ public abstract class Expr
 
     public class ClassInst : Expr
     {
-        public Token ClassId {get; init;}
+        public class Prop : Expr
+        {
+            public Token Id { get; set; }
+            public Expr Value { get; set; }
+
+            public Prop(Token id, Expr val)
+            {
+                Id = id;
+                Value = val;
+            }
+
+            public override Expr Eval(Interpreter.Context ctx)
+            {
+                return Value.Eval(ctx);
+            }
+
+            public override string? ToOutput()
+            {
+                return Value.ToString();
+            }
+        }
+
+        public Token ClassId { get; init; }
 
         public Class Class {get; private set;}
+
+        public Dictionary<string, Prop> Props {get; } = new Dictionary<string, Prop>();
 
         public ClassInst(Token classId)
         {
             ClassId = classId;
+        }
+
+        public Prop Get(Token propId, bool createNewProp = false)
+        {
+            string id = propId.Lexeme;
+            Props.TryGetValue(id, out Prop? prop);
+            if (prop == null)
+            {
+                if (createNewProp)
+                {
+                   prop = new Prop(propId, new Literal(AST.Literal.Nil.Instance)); 
+                   Props[id] = prop;
+                   return prop;
+                }
+                else
+                {
+                    throw new Exception($"[line {propId.Line}] Can't access undefined property '{propId.Lexeme}'.");
+                }
+            }
+            else
+            {
+                return prop;
+            }
+        }
+
+        public Prop Set(Token propId, Expr val, Interpreter.Context ctx)
+        {
+            string id = propId.Lexeme;
+            var eval = val.Eval(ctx);
+            if (!Props.TryAdd(id, new Prop(propId, eval)))
+            {
+                Props[id].Value = eval;
+            }
+            return Props[id];
         }
 
         public override Expr Eval(Interpreter.Context ctx)
@@ -599,7 +658,7 @@ public abstract class Expr
             }
             catch (Exception)
             {
-                throw new Exception($"The class '{ClassId.Lexeme}' is not defined");
+                throw new Exception($"[line {ClassId.Line}] The class '{ClassId.Lexeme}' is not defined");
             }
             return this;
         }
@@ -607,6 +666,56 @@ public abstract class Expr
         public override string? ToOutput()
         {
             return $"{Class.Id.Lexeme} instance";
+        }
+    }
+
+    public class Getter : Expr
+    {
+        public Expr ClassInstExpr { get; init; }
+        public Token PropId { get; init; }
+
+        public Getter(Expr classInstExpr, Token propId)
+        {
+            ClassInstExpr = classInstExpr;
+            PropId = propId;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            return Access(ctx, false).Eval(ctx);
+        }
+        
+
+        public ClassInst.Prop Access(Interpreter.Context ctx, bool createNewProp)
+        {
+            try
+            {
+                return ((ClassInst)ClassInstExpr.Eval(ctx)).Get(PropId, createNewProp);
+            }
+            catch
+            {
+                throw new Exception($"[line {PropId.Line}] Expression is not a class instance.");
+            }
+        }       
+    }
+
+    public class Setter : Expr
+    {
+        public Getter PropAccessor { get; init; }
+        public Expr Value { get; init; }
+
+        public Setter(Getter accessor, Expr val)
+        {
+            PropAccessor = accessor;
+            Value = val;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            var eval = Value.Eval(ctx);
+            var prop = PropAccessor.Access(ctx, true);
+            prop.Value = eval;
+            return prop.Eval(ctx);
         }
     }
 }

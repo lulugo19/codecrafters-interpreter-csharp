@@ -486,8 +486,24 @@ public class Parser
         }
         else
         {
-            return _ExprCall();
-        }      
+            return _ExprClassProp();
+        }
+    }
+
+    private Expr _ExprClassProp()
+    {
+        var expr = _ExprCall();
+        while (_Match(TokenType.DOT))
+        {
+            var propId = _Expect(TokenType.IDENTIFIER);
+            expr = new Expr.Getter(expr, propId);
+        }
+        if (expr is Expr.Getter accessor && _Match(TokenType.EQUAL))
+        {
+            var val = _Expr();
+            expr = new Expr.Setter(accessor, val);
+        }
+        return expr;
     }
 
     private Expr _ExprCall()
@@ -528,7 +544,7 @@ public class Parser
         if (_Match(TokenType.NUMBER))
         {
             return new Expr.Literal(new Literal.Number(((Number)_Previous().Literal).Value));
-        } 
+        }
         if (_Match(TokenType.STRING))
         {
             return new Expr.Literal(new Literal.String(_Previous().Literal as string));
