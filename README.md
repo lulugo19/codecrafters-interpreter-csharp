@@ -1,3 +1,6 @@
+# codecrafters-interpreter-csharp
+https://app.codecrafters.io/courses/interpreter
+
 [![progress-banner](https://backend.codecrafters.io/progress/interpreter/228f462f-cd54-4466-8428-a1c97018cbf0)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
 This is a starting point for C# solutions to the
