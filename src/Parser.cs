@@ -586,12 +586,6 @@ public class Parser
                     HasErrors = true;
                 }
             }
-            if (id.Lexeme[0] == id.Lexeme[0].ToString().ToUpper()[0] && _Peek().Type == TokenType.LEFT_PAREN)
-            {
-                _Expect(TokenType.LEFT_PAREN);
-                var args = _ExprArgs();
-                return new Expr.ClassInst(id, args);
-            }
             return new Expr.Var(id);
         }
         if (_Match(TokenType.LEFT_PAREN))

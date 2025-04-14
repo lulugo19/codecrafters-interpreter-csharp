@@ -1,33 +1,23 @@
-class Root {
-  getName() {
-    print "Root class";
+class baz {
+  inbaz() {
+    print "from baz";
   }
 }
 
-class Parent < Root {
-  parentMethod() {
-    print "Method defined in Parent";
+class bar < baz {
+  inbar() {
+    print "from bar";
   }
 }
 
-class Child < Parent {
-  childMethod() {
-    print "Method defined in Child";
+class quz < bar {
+  inquz() {
+    print "from quz";
   }
 }
 
-var root = Root();
-var parent = Parent();
-var child = Child();
-
-// Root methods are available to all
-root.getName();
-parent.getName();
-child.getName();
-
-// Parent methods are available to Parent and Child
-parent.parentMethod();
-child.parentMethod();
-
-// Child methods are only available to Child
-child.childMethod();
+// quz should inherit the methods
+// from both baz and bar
+var quz = quz();
+quz.inbaz();
+quz.inbar();

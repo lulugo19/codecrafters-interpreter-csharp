@@ -483,6 +483,10 @@ public abstract class Expr
         public override Expr Eval(Interpreter.Context ctx)
         {
             var funVal = Fun.Eval(ctx);
+            if (funVal is Class cls)
+            {
+                return new ClassInst(cls.Id, Args).Eval(ctx);
+            }
             if (funVal is Function fun)
             {
                 return fun.Run(ctx, this) ?? new Literal(AST.Literal.Nil.Instance);
