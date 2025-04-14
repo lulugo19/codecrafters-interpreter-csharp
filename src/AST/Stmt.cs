@@ -69,9 +69,26 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            var fun = new AST.Expr.Fun(Id, Params, Body);
-            ctx.DeclareVar(Id, fun);
+            var fun = new AST.Expr.Fun(Id, Params, Body);          
             fun.BoundedContext = ctx.Copy();
+            ctx.DeclareVar(Id, fun);
+            return null;
+        }
+    }
+
+    public class MethodDecl : FunDecl
+    {
+        public AST.Expr.Class Class {get; set;}
+
+        public MethodDecl(Token id, List<Token> param, Block body) : base(id, param, body) {}
+
+        public MethodDecl(FunDecl funDecl) : this(funDecl.Id, funDecl.Params, funDecl.Body) {}
+
+        public override AST.Expr? Run(Interpreter.Context ctx)
+        {
+            var method = new AST.Expr.Fun(Id, Params, Body);
+            method.BoundedContext = ctx.Copy();
+            Class.AddMethod(method);
             return null;
         }
     }
@@ -79,15 +96,24 @@ public abstract class Stmt
     public class ClassDecl : Stmt
     {
         public Token Id {get; init;}
+        
+        public List<MethodDecl> Methods {get; init;}
 
-        public ClassDecl(Token id)
+        public ClassDecl(Token id, List<MethodDecl> methods)
         {
             Id = id;
+            Methods = methods;
         }
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            ctx.DeclareVar(Id, new AST.Expr.Class(Id));
+            var cls = new AST.Expr.Class(Id);
+            ctx.DeclareVar(Id, cls);
+            foreach (var method in Methods)
+            {
+                method.Class = cls;
+                method.Run(ctx);
+            }
             return null;
         }
     }

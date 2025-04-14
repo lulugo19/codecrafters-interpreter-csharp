@@ -48,7 +48,7 @@ public class Parser
         catch (ParserException e)
         {
             HasErrors = true;
-            Console.Error.Write(e.Message);
+            Console.Error.WriteLine(e.Message);
         }
         return new AST.Program(stmts);
     }
@@ -64,7 +64,7 @@ public class Parser
         catch (ParserException e)
         {   
             HasErrors = true;
-            Console.Error.Write(e.Message);
+            Console.Error.WriteLine(e.Message);
             return null;
         }       
     }
@@ -85,7 +85,7 @@ public class Parser
             catch(ParserException e)
             {
                 HasErrors = true;
-                Console.Error.Write(e.Message);
+                Console.Error.WriteLine(e.Message);
 
                 // try recovering going to next semicolon
                 while (!_IsAtEnd() && _Advance().Type != TokenType.SEMICOLON);
@@ -182,8 +182,13 @@ public class Parser
     {
         var id = _Expect(TokenType.IDENTIFIER);
         _Expect(TokenType.LEFT_BRACE);
+        var methods = new List<Stmt.MethodDecl>();
+        while (_Peek().Type == TokenType.IDENTIFIER)
+        {
+            methods.Add(new Stmt.MethodDecl(_StmtFunDecl()));
+        }
         _Expect(TokenType.RIGHT_BRACE);
-        return new Stmt.ClassDecl(id);
+        return new Stmt.ClassDecl(id, methods);
     }
 
     private Stmt _Stmt()
@@ -229,7 +234,13 @@ public class Parser
 
     private Stmt.Expr _StmtExpr()
     { 
-        return new Stmt.Expr(_Expr());
+        var expr = _Expr();
+        if (expr is Expr.Getter accessor && _Match(TokenType.EQUAL))
+        {
+            var val = _Expr();
+            expr = new Expr.Setter(accessor, val);
+        }
+        return new Stmt.Expr(expr);
     }
 
     private Stmt.Block _StmtBlock(bool createNewVarScope = true)
@@ -486,29 +497,13 @@ public class Parser
         }
         else
         {
-            return _ExprClassProp();
+            return _ExprCall();
         }
-    }
-
-    private Expr _ExprClassProp()
-    {
-        var expr = _ExprCall();
-        while (_Match(TokenType.DOT))
-        {
-            var propId = _Expect(TokenType.IDENTIFIER);
-            expr = new Expr.Getter(expr, propId);
-        }
-        if (expr is Expr.Getter accessor && _Match(TokenType.EQUAL))
-        {
-            var val = _Expr();
-            expr = new Expr.Setter(accessor, val);
-        }
-        return expr;
     }
 
     private Expr _ExprCall()
     {
-        var expr = _ExprPrimary();
+        var expr = _ExprClassProp();
         while (_Match(TokenType.LEFT_PAREN))
         {
             List<Expr> args = new List<Expr>();
@@ -524,6 +519,17 @@ public class Parser
             }
             expr = new Expr.FuncCall(expr, args);
         }
+        return expr;
+    }
+
+    private Expr _ExprClassProp()
+    {
+        var expr = _ExprPrimary();
+        while (_Match(TokenType.DOT))
+        {
+            var propId = _Expect(TokenType.IDENTIFIER);
+            expr = new Expr.Getter(expr, propId);
+        }      
         return expr;
     }
 

@@ -564,6 +564,7 @@ public abstract class Expr
     public class Class : Expr
     {
         public Token Id {get; init;}
+        public Dictionary<string, Fun> Methods {get; } = new Dictionary<string, Fun>();
 
         public Class(Token id)
         {
@@ -573,6 +574,15 @@ public abstract class Expr
         public override Expr Eval(Interpreter.Context ctx)
         {
             return this;
+        }
+
+        public void AddMethod(Fun method)
+        {
+            string id = method.Id.Lexeme;
+            if (!Methods.TryAdd(id, method))
+            {
+                throw new Exception($"[line {method.Id.Line}] The method '{id}' has already been defined in the class.");
+            }
         }
 
         public override string ToOutput()
@@ -627,6 +637,10 @@ public abstract class Expr
                    prop = new Prop(propId, new Literal(AST.Literal.Nil.Instance)); 
                    Props[id] = prop;
                    return prop;
+                }
+                else if (Class.Methods.TryGetValue(id, out Expr.Fun? method))
+                {
+                    return new Prop(propId, method);
                 }
                 else
                 {
@@ -683,14 +697,14 @@ public abstract class Expr
         public override Expr Eval(Interpreter.Context ctx)
         {
             return Access(ctx, false).Eval(ctx);
-        }
-        
+        }    
 
         public ClassInst.Prop Access(Interpreter.Context ctx, bool createNewProp)
         {
             try
             {
-                return ((ClassInst)ClassInstExpr.Eval(ctx)).Get(PropId, createNewProp);
+                var classInst = (ClassInst)ClassInstExpr.Eval(ctx);              
+                return classInst.Get(PropId, createNewProp);
             }
             catch
             {

@@ -1,20 +1,33 @@
-// Property manipulation in functions
-class Wizard {}
-var gandalf = Wizard();
+class Superhero {
+  useSpecialPower(hero) {
+    print "Using power: " + hero.specialPower;
+  }
 
-gandalf.color = "Grey";
-gandalf.power = nil;
-print gandalf.color;
+  hasSpecialPower(hero) {
+    return hero.specialPower;
+  }
 
-fun promote(wizard) {
-  wizard.color = "White";
-  if (true) {
-    wizard.power = 100;
-  } else {
-    wizard.power = 0;
+  giveSpecialPower(hero, power) {
+    hero.specialPower = power;
   }
 }
 
-promote(gandalf);
-print gandalf.color;
-print gandalf.power;
+// Methods in functions
+fun performHeroics(hero, superheroClass) {
+  if (superheroClass.hasSpecialPower(hero)) {
+    superheroClass.useSpecialPower(hero);
+  } else {
+    print "No special power available";
+  }
+}
+
+var superman = Superhero();
+var heroClass = Superhero();
+
+if (true) {
+  heroClass.giveSpecialPower(superman, "Flight");
+} else {
+  heroClass.giveSpecialPower(superman, "Strength");
+}
+
+performHeroics(superman, heroClass);
