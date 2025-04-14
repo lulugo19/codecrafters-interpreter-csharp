@@ -57,7 +57,7 @@ public abstract class Stmt
     public class FunDecl : Stmt
     {
         public Token Id {get; init;}
-        public List<Token> Params {get; init;}
+        public List<Token> Params { get; init; }
         public Block Body {get; init;}
 
         public FunDecl(Token id, List<Token> param, Block body)
@@ -71,7 +71,23 @@ public abstract class Stmt
         {
             var fun = new AST.Expr.Fun(Id, Params, Body);
             ctx.DeclareVar(Id, fun);
-            fun.BoundedContext = ctx.Copy();    
+            fun.BoundedContext = ctx.Copy();
+            return null;
+        }
+    }
+
+    public class ClassDecl : Stmt
+    {
+        public Token Id {get; init;}
+
+        public ClassDecl(Token id)
+        {
+            Id = id;
+        }
+
+        public override AST.Expr? Run(Interpreter.Context ctx)
+        {
+            ctx.DeclareVar(Id, new AST.Expr.Class(Id));
             return null;
         }
     }
@@ -130,13 +146,13 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            if (Cond.Eval(ctx).ToBoolean())
+            if (Cond.Eval(ctx).IsTruthy())
             {
                 WhenTrue.Run(ctx);
             }
             else
             {
-                var trueElseIf = ElseIfs.FirstOrDefault(ei => ei.Cond.Eval(ctx).ToBoolean());
+                var trueElseIf = ElseIfs.FirstOrDefault(ei => ei.Cond.Eval(ctx).IsTruthy());
                 if (trueElseIf != null)
                 {
                     trueElseIf.WhenTrue.Run(ctx);
@@ -163,7 +179,7 @@ public abstract class Stmt
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            while (Cond.Eval(ctx).ToBoolean())
+            while (Cond.Eval(ctx).IsTruthy())
             {
                 LoopStmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)
@@ -194,7 +210,7 @@ public abstract class Stmt
         {
             ctx.StartBlockScope();
             Init?.Run(ctx);
-            while (Cond?.Eval(ctx)?.ToBoolean() ?? true)
+            while (Cond?.Eval(ctx)?.IsTruthy() ?? true)
             {
                 LoopStmt.Run(ctx);
                 if ((ctx.Flags & Interpreter.Flags.RETURN) == Interpreter.Flags.RETURN)

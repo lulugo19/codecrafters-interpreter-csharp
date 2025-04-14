@@ -14,7 +14,7 @@ public abstract class Expr
         return ToString();
     }
 
-    public bool ToBoolean()
+    public bool IsTruthy()
     {
         var isFalsy = this is Literal lit && (lit.Value is AST.Literal.Boolean b && !b.Value || lit.Value is AST.Literal.Nil);
         return !isFalsy;
@@ -141,7 +141,7 @@ public abstract class Expr
 
             public override Expr Eval(Interpreter.Context ctx)
             {
-                return new Literal(new AST.Literal.Boolean(!Expr.Eval(ctx).ToBoolean()));
+                return new Literal(new AST.Literal.Boolean(!Expr.Eval(ctx).IsTruthy()));
             }
         }
     }
@@ -422,12 +422,12 @@ public abstract class Expr
             public override Expr Eval(Interpreter.Context ctx)
             {
                 var leftVal = Left.Eval(ctx);
-                if (leftVal.ToBoolean())
+                if (leftVal.IsTruthy())
                 {
                     return leftVal;
                 }
                 var rightVal = Right.Eval(ctx);
-                if (rightVal.ToBoolean())
+                if (rightVal.IsTruthy())
                 {
                     return rightVal;
                 }
@@ -447,12 +447,12 @@ public abstract class Expr
             public override Expr Eval(Interpreter.Context ctx)
             {
                 var leftVal = Left.Eval(ctx);
-                if (!leftVal.ToBoolean())
+                if (!leftVal.IsTruthy())
                 {
                     return new Literal(new AST.Literal.Boolean(false));
                 }
                 var rightVal = Right.Eval(ctx);
-                if (!rightVal.ToBoolean())
+                if (!rightVal.IsTruthy())
                 {
                     return new Literal(new AST.Literal.Boolean(false));
                 }
@@ -558,4 +558,26 @@ public abstract class Expr
             }
         }
     }
+
+    public class Class : Expr
+    {
+        Token Id {get; init;}
+
+        public Class(Token id)
+        {
+            Id = id;
+        }
+
+        public override Expr Eval(Interpreter.Context ctx)
+        {
+            return this;
+        }
+
+        public override string ToOutput()
+        {
+            return Id.Lexeme;
+        }
+    }
+
+    
 }

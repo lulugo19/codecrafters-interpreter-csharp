@@ -104,6 +104,10 @@ public class Parser
         {
             return _StmtFunDecl();
         }
+        else if (_Match(TokenType.CLASS))
+        {
+            return _StmtClassDecl();
+        }
         return _Stmt();
     }
 
@@ -172,6 +176,14 @@ public class Parser
         _isInFunctionScope = wasInFunctionScope;
         _declaredVariables.Pop();
         return new Stmt.FunDecl(id, param, body);
+    }
+
+    private Stmt.ClassDecl _StmtClassDecl()
+    {
+        var id = _Expect(TokenType.IDENTIFIER);
+        _Expect(TokenType.LEFT_BRACE);
+        _Expect(TokenType.RIGHT_BRACE);
+        return new Stmt.ClassDecl(id);
     }
 
     private Stmt _Stmt()
@@ -548,11 +560,9 @@ public class Parser
     {
         HasErrors = true;
         var msg = "No valid expression";
-        if (_current > 0) 
-        {          
-            var token = _Peek();
-            msg = $"[line {token.Line}] Error at '{token.Lexeme}': Expect expression.";
-        }
+        var token = _Peek();
+        msg = $"[line {token.Line}] Error at '{token.Lexeme}': Expect expression.";
+        
         return new ParserException(msg);
     }
 
