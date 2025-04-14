@@ -595,10 +595,12 @@ public abstract class Expr
     {
         public Token Id {get; init;}
         public Dictionary<string, Method> Methods {get; } = new Dictionary<string, Method>();
+        public Class? SuperClass {get; init;}
 
-        public Class(Token id)
+        public Class(Token id, Class? superClass)
         {
             Id = id;
+            SuperClass = superClass;
         }
 
         public override Expr Eval(Interpreter.Context ctx)
@@ -613,6 +615,16 @@ public abstract class Expr
             {
                 throw new Exception($"[line {method.Id.Line}] The method '{id}' has already been defined in the class.");
             }
+        }
+
+        public bool TryGetMethod(Token methodId, out Method? method)
+        {
+            var id = methodId.Lexeme;
+            if (Methods.TryGetValue(id, out method))
+            {
+                return true;
+            }
+            return SuperClass?.TryGetMethod(methodId, out method) ?? false;
         }
 
         public override string ToOutput()
@@ -674,9 +686,9 @@ public abstract class Expr
                    Props[id] = prop;
                    return prop;
                 }
-                else if (Class.Methods.TryGetValue(id, out Expr.Method? method))
+                else if (Class.TryGetMethod(propId, out Method? method))
                 {
-                    return new Prop(propId, new Method(method, this));
+                    return new Prop(propId, new Method(method!, this));
                 }
                 else
                 {
@@ -687,7 +699,7 @@ public abstract class Expr
             {
                 return prop;
             }
-        }
+        }    
 
         public Prop Set(Token propId, Expr val, Interpreter.Context ctx)
         {

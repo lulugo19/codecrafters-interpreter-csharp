@@ -98,23 +98,37 @@ public abstract class Stmt
         public Token Id {get; init;}
         public Token? SuperClass {get; init;}
         
-        public List<MethodDecl> Methods {get; init;}
+        public List<MethodDecl> MethodDeclrs {get; init;}
 
         public ClassDecl(Token id, Token? superClass, List<MethodDecl> methods)
         {
             Id = id;
-            Methods = methods;
+            MethodDeclrs = methods;
             SuperClass = superClass;
         }
 
         public override AST.Expr? Run(Interpreter.Context ctx)
         {
-            var cls = new AST.Expr.Class(Id);
-            ctx.DeclareVar(Id, cls);
-            foreach (var method in Methods)
+            
+            AST.Expr.Class? superClass = null;
+            if (SuperClass != null)
             {
-                method.Class = cls;
-                method.Run(ctx);
+                try
+                {
+                    superClass = (AST.Expr.Class)ctx.GetVarVal(SuperClass);    
+                }
+                catch(Exception)
+                {
+                      throw new Exception($"[line {SuperClass.Line}] Error at '{SuperClass.Lexeme}': Can't find class '{SuperClass.Lexeme}'.");
+                }
+            }
+                
+            var cls = new AST.Expr.Class(Id, superClass);
+            ctx.DeclareVar(Id, cls);
+            foreach (var methodDecl in MethodDeclrs)
+            {
+                methodDecl.Class = cls;
+                methodDecl.Run(ctx);
             }
             return null;
         }
