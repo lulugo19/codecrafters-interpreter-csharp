@@ -27,6 +27,7 @@ public class Parser
 
     private Token? _insideVarDeclaration = null;
     private bool _insideClassDeclaration = false;
+    private bool _hasSuperClass = false;
 
     public bool HasErrors {get; private set;} = false;
 
@@ -191,6 +192,7 @@ public class Parser
         if (_Match(TokenType.LESS))
         {
             superClass = _Expect(TokenType.IDENTIFIER);
+            _hasSuperClass = true;
             if (superClass.Lexeme == id.Lexeme)
             {
                 Console.Error.WriteLine($"[line {superClass.Line}] Error at '{superClass.Lexeme}': A class can't inherit from itself.");
@@ -205,6 +207,7 @@ public class Parser
             methods.Add(new Stmt.MethodDecl(_StmtFunDecl()));
         }
         _insideClassDeclaration = false;
+        _hasSuperClass = true;
         _Expect(TokenType.RIGHT_BRACE);
         return new Stmt.ClassDecl(id, superClass, methods);
     }
@@ -575,6 +578,11 @@ public class Parser
             if (!_insideClassDeclaration)
             {
                 Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': Can't use '{token.Lexeme}' outside of a class.");
+                HasErrors = true;
+            }
+            if (token.Type == TokenType.SUPER && !_hasSuperClass)
+            {
+                Console.Error.WriteLine($"[line {token.Line}] Error at '{token.Lexeme}': Can't use super. It's not a subclass.");
                 HasErrors = true;
             }
             return new Expr.Var(token);
